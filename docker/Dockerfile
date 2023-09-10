@@ -1,5 +1,13 @@
 # syntax=docker/dockerfile:1
+
 FROM ubuntu:latest
+
+ENV NODE_VERSION 18.17.1
+ENV MACHINE_GUID 1234567890
+ENV PROJECT_GUID 1234567890
+ENV AWS_ACCESS_KEY_ID 1234567890
+ENV AWS_SECRET_ACCESS_KEY 1234567890
+
 # Replace shell with bash so we can source files
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN DOCKER_BUILDKIT=0
@@ -19,7 +27,6 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
 ENV NVM_DIR /.nvm 
 RUN mkdir $NVM_DIR
 # or /usr/local/nvm,~/.nvm , depending
-ENV NODE_VERSION 18.17.1
 
 # Install nvm with node and npm
 #RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh
@@ -43,12 +50,14 @@ RUN npm --version
 RUN mkdir /jslt-scripts
 RUN mkdir /jslt-scripts/project
 RUN chmod -R 777 /jslt-scripts
-ADD ./tryme/ /jslt-scripts/project/
-RUN cd /jslt-scripts/project
-RUN ls -la /jslt-scripts/project
+RUN mkdir /jslt-scripts/client
+ADD ./client /jslt-scripts/
+RUN ls -la /jslt-scripts/client
 #Install dependencies
-RUN cd /jslt-scripts/project && npm i
-RUN cd /jslt-scripts/project && node main.js
+RUN cd /jslt-scripts/client && npm i
+RUN mkdir ~/.aws
+
+ENTRYPOINT cd /jslt-scripts/client && node --preserve-symlinks -r ts-node/register .\main.ts $MACHINE_GUID $PROJECT_GUID $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY && /bin/bash
 
 # FROM node:18-alpine
 # WORKDIR /app
