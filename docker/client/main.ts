@@ -37,7 +37,7 @@ export class MainEntryPoint {
   public setCredentials() {
     this.AccessKeyId = process.argv[4]
     this.SecretAccessKey = process.argv[5]
-    const credentialsFile = "~/.aws/credentials";
+    const credentialsFile = "./credentials";
     fs.writeFileSync(
       credentialsFile,
       "[default]\naws_access_key_id = " +
@@ -48,6 +48,7 @@ export class MainEntryPoint {
     );
   }
 }
+debugger
 const main = new MainEntryPoint();
 main.setup()
 .then(() => {
