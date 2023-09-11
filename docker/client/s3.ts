@@ -1,7 +1,7 @@
-import AWS = require('aws-sdk'); 
+import AWS = require("aws-sdk");
 import IProjectDetails from "./types/projectDetails";
-import * as fs from 'fs';
-import unzipper from "unzipper";
+import * as fs from "fs";
+import * as decompress from "decompress";
 export default class S3 {
   public static async getFile(
     bucket: string,
@@ -16,7 +16,7 @@ export default class S3 {
     await new Promise<void>((resolve, reject) => {
       s3.getObject(s3Params, function (err, res) {
         if (err === null) {
-          fs.writeFileSync(path,res.Body as Buffer);
+          fs.writeFileSync(path, res.Body as Buffer);
           resolve();
         } else {
           reject(err);
@@ -26,20 +26,19 @@ export default class S3 {
   }
 
   public static async getProjectPackage(projectConfig: IProjectDetails) {
+    const output = "/jslt-scripts/project";
     const path = "/jslt-scripts/project/main.zip";
+    if (fs.existsSync(path) == false) {
+      fs.mkdirSync("/jslt-scripts/project", { recursive: true });
+    }
     await this.getFile(
       projectConfig.S3_BUCKET,
       projectConfig.S3_PROJECT_ZIP,
       path
     );
-    await fs
-      .createReadStream(path)
-      .pipe(unzipper.Parse())
-      .on("entry", (entry) => entry.autodrain())
-      .promise()
-      .then(
-        () => console.log("done"),
-        (e) => console.log("error", e)
-      );
+
+    const files = await decompress(path, output,{ });
+    console.log({projectFiles: files.map(f=>f.path)});
+    console.log("Project downloaded");
   }
 }

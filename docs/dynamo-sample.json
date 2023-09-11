@@ -1,0 +1,209 @@
+{
+  "PartitionKey": {
+    "S": "db849ae6-d724-4668-bfa4-6da914c4c768"
+  },
+  "AWS_ACCESS_KEY": {
+    "S": ""
+  },
+  "AWS_REGION": {
+    "S": "us-east-1"
+  },
+  "AWS_SECRET_ACCESS_KEY": {
+    "S": ""
+  },
+  "Executions": {
+    "L": [
+      {
+        "M": {
+          "ExecutionStatus": {
+            "S": "READY_TO_START"
+          },
+          "Id": {
+            "S": "f7fbb6f6-ef92-4824-8b30-53a061ebb5b0"
+          },
+          "Machines": {
+            "L": [
+              {
+                "M": {
+                  "Id": {
+                    "S": "79546536-ba2a-48c8-be70-15473d02eb53"
+                  },
+                  "MachineLogs": {
+                    "L": [
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "TRACE"
+                          },
+                          "Message": {
+                            "S": "First log"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "ERROR"
+                          },
+                          "Message": {
+                            "S": "Debugger attached.\r\n"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "ERROR"
+                          },
+                          "Message": {
+                            "S": "Debugger listening on ws://127.0.0.1:44112/7c27ed34-c342-4f46-9a58-7e5a45e4945b\r\nFor help, see: https://nodejs.org/en/docs/inspector\r\n"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "ERROR"
+                          },
+                          "Message": {
+                            "S": "Waiting for the debugger to disconnect...\r\n"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "TRACE"
+                          },
+                          "Message": {
+                            "S": "Hello World\n"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "TRACE"
+                          },
+                          "Message": {
+                            "S": "child process exited with code 0"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "TRACE"
+                          },
+                          "Message": {
+                            "S": "Execution finished"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "ERROR"
+                          },
+                          "LogTime": {
+                            "N": "1694417814471"
+                          },
+                          "Message": {
+                            "S": "Debugger listening on ws://127.0.0.1:46300/ac515560-3bc8-4c24-98d7-4657ba179d5d\r\nFor help, see: https://nodejs.org/en/docs/inspector\r\n"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "ERROR"
+                          },
+                          "LogTime": {
+                            "N": "1694417814512"
+                          },
+                          "Message": {
+                            "S": "Debugger attached.\r\n"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "TRACE"
+                          },
+                          "LogTime": {
+                            "N": "1694417814565"
+                          },
+                          "Message": {
+                            "S": "Hello World\n"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "ERROR"
+                          },
+                          "LogTime": {
+                            "N": "1694417814569"
+                          },
+                          "Message": {
+                            "S": "Waiting for the debugger to disconnect...\r\n"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "TRACE"
+                          },
+                          "LogTime": {
+                            "N": "1694417814635"
+                          },
+                          "Message": {
+                            "S": "child process exited with code 0"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "LogLevel": {
+                            "S": "TRACE"
+                          },
+                          "LogTime": {
+                            "N": "1694417814961"
+                          },
+                          "Message": {
+                            "S": "Execution finished"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "MachineStatus": {
+                    "S": "RUNNING"
+                  },
+                  "Message": {
+                    "S": "Done"
+                  }
+                }
+              }
+            ]
+          },
+          "MachinesNumber": {
+            "N": "1"
+          }
+        }
+      }
+    ]
+  },
+  "Message": {
+    "S": ""
+  },
+  "S3_BUCKET": {
+    "S": "jslts"
+  },
+  "S3_PROJECT_ZIP": {
+    "S": "db849ae6-d724-4668-bfa4-6da914c4c768/tryme.zip"
+  }
+}
