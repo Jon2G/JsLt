@@ -1,0 +1,33 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {section}{\numberline {1}Resumen}{3}{section.1}%
+\contentsline {section}{\numberline {2}Introducción}{3}{section.2}%
+\contentsline {section}{\numberline {3}Planteamiento del Problema}{3}{section.3}%
+\contentsline {section}{\numberline {4}Objetivos}{3}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Objetivo General}{3}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Objetivos específicos}{3}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Límites y alcances}{4}{section.5}%
+\contentsline {section}{\numberline {6}Justificación}{4}{section.6}%
+\contentsline {section}{\numberline {7}Estado del Arte}{4}{section.7}%
+\contentsline {section}{\numberline {8}Marco Teórico}{4}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Sistemas de Información}{4}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Pruebas de carga}{5}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Base de datos}{5}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Tecnologias y software}{5}{subsection.8.4}%
+\contentsline {section}{\numberline {9}Desarrollo}{6}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Cronograma de actividades}{9}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Implementacion de ISO 2000 en el proyecto}{11}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Diagrama de Casos de Uso}{12}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Matriz de trazabilidad de casos de uso.}{13}{subsection.9.4}%
+\contentsline {subsection}{\numberline {9.5}Matriz de trazabilidad}{14}{subsection.9.5}%
+\contentsline {subsection}{\numberline {9.6}Diagrama de funcionamiento}{17}{subsection.9.6}%
+\contentsline {subsection}{\numberline {9.7}Modelo de solución de software}{18}{subsection.9.7}%
+\contentsline {subsection}{\numberline {9.8}Diagrama de funcionamiento ventana principal}{18}{subsection.9.8}%
+\contentsline {subsection}{\numberline {9.9}Diagrama entidad-relación}{19}{subsection.9.9}%
+\contentsline {subsection}{\numberline {9.10}Desarrollo de API}{20}{subsection.9.10}%
+\contentsline {subsection}{\numberline {9.11}Llamada desde la aplicación al API}{20}{subsection.9.11}%
+\contentsline {subsection}{\numberline {9.12}Fragmento de código de la pantalla para dar de alta una tarea}{21}{subsection.9.12}%
+\contentsline {subsection}{\numberline {9.13}Implementación widget nativo}{22}{subsection.9.13}%
+\contentsline {subsection}{\numberline {9.14}Principales funcionalidades de la aplicación.}{24}{subsection.9.14}%
+\contentsline {section}{\numberline {10}Conclusión}{28}{section.10}%
+\contentsline {section}{Referencias}{28}{section.10}%
+\contentsline {section}{\numberline {11}Anexos}{28}{section.11}%
