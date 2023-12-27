@@ -15,26 +15,28 @@
 
         <v-divider></v-divider>
 
-        <v-list v-model:selected="selectedTab" density="compact" nav>
-          <v-list-item prepend-icon="mdi-folder" title="Tests" value="tests"></v-list-item>
+        <v-list v-model:selected="selectedTabs" density="compact" nav>
+          <v-list-item prepend-icon="mdi-folder" title="Execute" value="execution"></v-list-item>
           <v-list-item prepend-icon="mdi-account-multiple" title="Shared with me" value="shared"></v-list-item>
           <v-list-item prepend-icon="mdi-star" title="Starred" value="starred"></v-list-item>
         </v-list>
       </v-navigation-drawer>
 
-      <v-main style="height: 250px">
+      <v-main style="height: 100vh">
         <v-card-text>
-          {{ selectedTab }}
-          The navigation drawer will appear from the bottom on smaller size screens.
+          <ExecutionsView v-if="selectedTab=='execution'"/>
+          <p v-else>{{ selectedTab }}</p>
         </v-card-text>
       </v-main>
     </v-layout>
   </v-card>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import ExecutionsView from './ExecutionsView.vue'
 
   //
-  const selectedTab = ref(['tests'])
+  const selectedTabs = ref(['tests'])
+  const selectedTab=computed(()=>selectedTabs.value[0])
 
 </script>
