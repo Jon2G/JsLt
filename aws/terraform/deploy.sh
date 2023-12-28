@@ -21,5 +21,7 @@
   cd ../terraform && \
   terraform plan -input=false -var lambdasVersion="$TIMESTAMP" -out=./tfplan 
   terraform apply "./tfplan"
+  rm "./zips/lambda_function_"$TIMESTAMP".zip"
+  terraform output
   #&& \
   #terraform apply -input=false ./tfplan
