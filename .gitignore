@@ -398,6 +398,7 @@ FodyWeavers.xsd
 *.sln.iml
 *.zip
 docker/client/credentials
+# Terraform state files
 .terraform/
 .terraform.lock.hcl
 terraform.tfstate
