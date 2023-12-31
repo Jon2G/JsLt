@@ -8,15 +8,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
-const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
-    const message = "Hello World!";
-    console.log(`The event: ${JSON.stringify(event)}`);
-    console.log(`Returning ${message}`);
-    return {
-        statusCode: 200,
-        body: JSON.stringify(message),
-    };
-});
+const handlerWrapper_1 = __importDefault(require("./lambdaContext/handlerWrapper"));
+const test_1 = require("./test");
+function handler(event, context) {
+    return handlerWrapper_1.default.run(event, context, () => __awaiter(this, void 0, void 0, function* () {
+        //
+        //User test code here
+        yield (0, test_1.testRun)();
+        //
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: "hello world",
+            }),
+        };
+    }));
+}
 exports.handler = handler;

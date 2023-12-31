@@ -32,6 +32,9 @@ resource "aws_instance" "docdb_bastion" {
     user        = "ec2-user"
     private_key = tls_private_key.ts_lambda.private_key_pem
   }
+  tags = {
+    Name = "docdb-bastion-vm"
+  }
 }
 
 resource "tls_private_key" "ts_lambda" {

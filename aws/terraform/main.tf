@@ -7,7 +7,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "> 4.47.0"
+      version = "~> 5.0"
     }
   }
   backend "s3" {
@@ -18,15 +18,7 @@ terraform {
   }
 }
 
-resource "aws_s3_bucket" "terraform_state" {
-  force_destroy = true
-  bucket = "jslt-aws-s3-bucket-terraform-state"
 
-  # Prevent accidental deletion of this S3 bucket
-  lifecycle {
-    prevent_destroy = false
-  }
-}
 
 resource "aws_iam_role" "ts_lambda_role" {
   name = "ts_lambda_role"
@@ -43,8 +35,6 @@ resource "aws_iam_role" "ts_lambda_role" {
     ]
   })
 }
-
-
 
 resource "aws_cloudwatch_log_group" "ts_lambda_loggroup" {
   name              = "/aws/lambda/${aws_lambda_function.ts_lambda.function_name}"

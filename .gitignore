@@ -404,3 +404,9 @@ docker/client/credentials
 terraform.tfstate
 terraform.tfstate.backup
 tfplan
+/lambdaContext/*.js
+/metricsLayer/*.js
+/metricsLayer/*.js
+/documentDb/*.js
+/aws/lambda/dist/*
+/test/*

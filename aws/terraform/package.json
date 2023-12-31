@@ -4,8 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "./deploy.sh",
+    "bundle": "ts-node scripts/bundle.ts",
+    "bundle-deploy": "npm run bundle && npm run deploy"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1528.0",
+    "esbuild": "^0.19.11",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  }
 }

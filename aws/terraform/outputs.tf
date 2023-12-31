@@ -9,7 +9,9 @@ output "aws_instance_public_dns" {
 output "docdb_endpoint" {
   value = "${aws_docdb_cluster.ts_lambda.endpoint}"
 }
-
+output "docdb_port" {
+  value = "${aws_docdb_cluster.ts_lambda.port}"
+}
 output "docdb_username" {
   value = "${aws_docdb_cluster.ts_lambda.master_username}"
 }
@@ -24,4 +26,8 @@ output "bucket_key" {
 
 output "name" {
   value = "${var.name}"
+}
+
+output "victim_ec2_aws_eip" {
+  value = "${aws_instance.victim_ec2.public_ip}"
 }

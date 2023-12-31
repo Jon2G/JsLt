@@ -18,3 +18,21 @@ variable "docdb_password" {
 variable "main_domain" {
   default = ""
 }
+variable "source_dir" {
+  default = "./../packages"
+}
+
+variable "layer_skip_destroy" {
+  description = "Whether to retain the old version of a previously deployed Lambda Layer."
+  type        = bool
+  default     = false
+}
+
+variable "s3_bucket" {
+  default = "jslt-aws-s3-bucket-terraform-state"
+}
+
+variable "baseLayerZip" {
+  default = "./../lambda/layers/baseLayer.zip"
+  
+}

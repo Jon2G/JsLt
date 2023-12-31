@@ -1,14 +1,27 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import {
+  APIGatewayProxyEventV2,
+  APIGatewayProxyResultV2,
+  Context,
+  APIGatewayProxyResult,
+  APIGatewayEvent,
+} from "aws-lambda";
+import HandlerEntryPoint from "./lambdaContext/handlerWrapper";
+import { testRun } from "./test";
 
-
-export const handler = async (
-  event: APIGatewayProxyEventV2
-): Promise<APIGatewayProxyResultV2<string>> => {
-  const message = "Hello World!";
-  console.log(`The event: ${JSON.stringify(event)}`);
-  console.log(`Returning ${message}`);
-  return {
-    statusCode: 200,
-    body: JSON.stringify(message),
-  } as APIGatewayProxyResultV2<string>;
-};
+export function handler(
+  event: APIGatewayEvent,
+  context: Context
+): Promise<APIGatewayProxyResult> {
+  return HandlerEntryPoint.run(event, context, async () => {
+    //
+    //User test code here
+    await testRun();
+    //
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: "test-done",
+      }),
+    };
+  });
+}
