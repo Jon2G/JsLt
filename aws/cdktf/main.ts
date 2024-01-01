@@ -504,17 +504,19 @@ you need to keep this like it is.*/
       {
         ami: dataAwsAmiLatestAmzLinux.id,
         associatePublicIpAddress: true,
-        connection: [
+        connection: 
           {
-           //HERE //host: "${self.public_ip}",
-            private_key: tlsPrivateKeyTsLambda.privateKeyPem,
+           host: "${self.public_ip}",
+           // host: awsInstanceDocdbBastion.publicIp,
+           privateKey: tlsPrivateKeyTsLambda.privateKeyPem,
             type: "ssh",
             user: "ec2-user",
-          } as SSHProvisionerConnection | WinrmProvisionerConnection,
-        ],
+          },
+        
         instanceType: "t2.micro",
         keyName: awsKeyPairTsLambda.keyName,
-        subnetId: `\${${vpc.publicSubnetsOutput.fqn}[0]}`,
+        //subnetId: `\${${vpc.publicSubnetsOutput.fqn}[0]}`,
+        subnetId: vpc.publicSubnetsOutput,
         tags: {
           Name: "docdb-bastion-vm",
         },
@@ -524,7 +526,6 @@ you need to keep this like it is.*/
         ],
       }
     );
-    awsInstanceDocdbBastion.connection[0].host = awsInstanceDocdbBastion.publicIp;
 
     const awsInstanceVictimEc2 = new aws.instance.Instance(this, "victim_ec2", {
       ami: dataAwsAmiUbuntuLinux2004.id,
@@ -558,7 +559,7 @@ you need to keep this like it is.*/
       this,
       "ts_lambda_48",
       {
-        depends_on: [`\${${awsInstanceVictimEc2.fqn}}`],
+        dependsOn: [awsInstanceVictimEc2], //HERE
         environment: {
           variables: {
             dbConnectionString: `mongodb://\${${awsDocdbClusterTsLambda.masterUsername}}:\${${awsDocdbClusterTsLambda.masterPassword}}@\${${awsDocdbClusterTsLambda.endpoint}}:\${${awsDocdbClusterTsLambda.port}}/jslt?tls=false&tlsCAFile=/opt/nodejs/docdb-bastion.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`,
@@ -575,7 +576,7 @@ you need to keep this like it is.*/
         timeout: 300,
         vpcConfig: {
           securityGroupIds: [awsSecurityGroupTsLambda.id],
-          subnetIds: vpc.publicSubnetsOutput,
+          subnetIds: [vpc.publicSubnetsOutput],
         },
       }
     );
@@ -658,9 +659,11 @@ you need to keep this like it is.*/
       );
     const awsApiGatewayDeploymentTsLambda =
       new aws.apiGatewayDeployment.ApiGatewayDeployment(this, "ts_lambda_57", {
-        depends_on: [
-          `\${${cors.fqn}}`,
-          `\${${awsApiGatewayIntegrationTsLambda.fqn}}`,
+        dependsOn:
+        //HERE
+        [
+          cors,
+          awsApiGatewayIntegrationTsLambda,
         ],
         restApiId: awsApiGatewayRestApiTsLambda.id,
         stageName: name.value,
