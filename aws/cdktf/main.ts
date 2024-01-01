@@ -136,12 +136,17 @@ You can read more about this at https://cdk.tf/variables*/
           ],
         }
       );
+      const awsSubnetPublicSubnet = new aws.subnet.Subnet(this, "public-subnet", {
+        availabilityZone: awsAz,
+        cidrBlock: publicSubnetCidr,
+        vpcId: vpc.vpcIdOutput,
+      });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsDocdbClusterParameterGroupTsLambda.overrideLogicalId("ts_lambda");
     const awsDocdbSubnetGroupTsLambda =
       new aws.docdbSubnetGroup.DocdbSubnetGroup(this, "ts_lambda_16", {
         name: `tf-${name}`,
-        subnetIds: vpc.privateSubnets??[] //[privateSubnetsOutput],
+        subnetIds:[awsSubnetPublicSubnet.id] //vpc.privateSubnets??[] //[privateSubnetsOutput],
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsDocdbSubnetGroupTsLambda.overrideLogicalId("ts_lambda");
@@ -299,11 +304,7 @@ you need to keep this like it is.*/
     );
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsSecurityGroupTsLambda.overrideLogicalId("ts_lambda");
-    const awsSubnetPublicSubnet = new aws.subnet.Subnet(this, "public-subnet", {
-      availabilityZone: awsAz,
-      cidrBlock: publicSubnetCidr,
-      vpcId: vpc.vpcIdOutput,
-    });
+
     const filesKeepers = fs.readdirSync('./../packages/').map((filename) => {
       return {
         name: filename,
@@ -577,7 +578,7 @@ you need to keep this like it is.*/
         timeout: 300,
         vpcConfig: {
           securityGroupIds: [awsSecurityGroupTsLambda.id],
-          subnetIds:vpc.publicSubnets??[] //[vpc.publicSubnetsOutput],
+          subnetIds:[awsSubnetPublicSubnet.id], //vpc.publicSubnets??[] //[vpc.publicSubnetsOutput],
         },
       }
     );
@@ -597,7 +598,7 @@ you need to keep this like it is.*/
       sourceArn: "arn:aws:execute-api:"+region+":"+dataAwsCallerIdentityCurrent.accountId+":"+awsApiGatewayRestApiTsLambda.id+"/*/*",
       statementId: "AllowAPIGatewayInvoke",
     });
-    new cdktf.TerraformOutput(this, "aws_instance_public_dns", {
+    new cdktf.TerraformOutput(this, "aws_insta nce_public_dns", {
       value: awsInstanceDocdbBastion.publicDns,
     });
     new cdktf.TerraformOutput(this, "victim_ec2_aws_eip", {
