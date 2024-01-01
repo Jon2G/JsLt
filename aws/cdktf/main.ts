@@ -15,6 +15,10 @@ import * as crypto from "crypto";
 // SPDX-License-Identifier: MPL-2.0
 import { Construct } from "constructs";
 import { App, TerraformStack } from "cdktf";
+import { ArchiveProvider } from "./.gen/providers/archive/provider";
+import { RandomProvider } from "./.gen/providers/random/provider";
+import { LocalProvider } from "./.gen/providers/local/provider";
+import { TlsProvider } from "./.gen/providers/tls/provider";
 
 class MyStack extends TerraformStack {
   constructor(scope: Construct, id: string) {
@@ -26,6 +30,10 @@ class MyStack extends TerraformStack {
       profile: "jon2g-jslt",
       region: "us-east-1",
     });
+    new ArchiveProvider(this, "archive",{})
+    new RandomProvider(this, "random",{})
+    new TlsProvider(this, "tls",{})
+    new LocalProvider(this, "local",{})
     /*Terraform Variables are not always the best fit for getting inputs in the context of Terraform CDK.
 You can read more about this at https://cdk.tf/variables*/
     new aws.provider.AwsProvider(this, "aws", {
