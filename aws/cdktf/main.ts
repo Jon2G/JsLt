@@ -143,7 +143,7 @@ You can read more about this at https://cdk.tf/variables*/
         vpcId: vpc.vpcIdOutput
       });
       const awsSubnetPublicSubnet2 = new aws.subnet.Subnet(this, "public-subnet", {
-        availabilityZone: awsAz,
+        availabilityZone: awsBz,
         cidrBlock: publicSubnetCidr,
         vpcId: vpc.vpcIdOutput
       });
@@ -584,7 +584,7 @@ you need to keep this like it is.*/
         timeout: 300,
         vpcConfig: {
           securityGroupIds: [awsSecurityGroupTsLambda.id],
-          subnetIds:[awsSubnetPublicSubnet.id], //vpc.publicSubnets??[] //[vpc.publicSubnetsOutput],
+          subnetIds:[awsSubnetPublicSubnet.id,awsSubnetPublicSubnet2.id], //vpc.publicSubnets??[] //[vpc.publicSubnetsOutput],
         },
       }
     );
