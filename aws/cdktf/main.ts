@@ -14,7 +14,7 @@ import * as crypto from "crypto";
 // Copyright (c) HashiCorp, Inc
 // SPDX-License-Identifier: MPL-2.0
 import { Construct } from "constructs";
-import { App, TerraformStack } from "cdktf";
+import { App, Fn, TerraformStack } from "cdktf";
 import { ArchiveProvider } from "./.gen/providers/archive/provider";
 import { RandomProvider } from "./.gen/providers/random/provider";
 import { LocalProvider } from "./.gen/providers/local/provider";
@@ -197,9 +197,9 @@ You can read more about this at https://cdk.tf/variables*/
       "layer_package",
       {
         bucket: s3Bucket.value,
-        key: "${basename(abspath('"+baseLayerZip+"'))}",
-        source: "${abspath('"+baseLayerZip+"')}",
-        sourceHash: "${filemd5(abspath('"+baseLayerZip+"'))}",
+        key: Fn.basename(Fn.abspath(baseLayerZip)),
+        source:Fn.abspath(baseLayerZip), 
+        sourceHash:Fn.filemd5(Fn.abspath(baseLayerZip)),
       }
     );
     /*In most cases loops should be handled in the programming language context and 
@@ -420,7 +420,7 @@ you need to keep this like it is.*/
         dbSubnetGroupName: awsDocdbSubnetGroupTsLambda.name,
         engine: "docdb",
         masterPassword: docdbPassword.value,
-        masterUsername: `tf_\${replace(${name.value}, "-", "_")}_admin`,
+        masterUsername: `tf_${Fn.replace(name.value,'-','_')}_admin`,
         skipFinalSnapshot: true,
         vpcSecurityGroupIds: [awsSecurityGroupTsLambda.id],
       }
@@ -511,7 +511,7 @@ you need to keep this like it is.*/
         associatePublicIpAddress: true,
         connection: 
           {
-           host: "${self.public_ip}",
+           host:"${self.public_ip}",
            // host: awsInstanceDocdbBastion.publicIp,
            privateKey: tlsPrivateKeyTsLambda.privateKeyPem,
             type: "ssh",
@@ -571,10 +571,10 @@ you need to keep this like it is.*/
             testingIp: awsInstanceVictimEc2.privateIp,
           },
         },
-        filename: `\${${dataArchiveFileLambdaPackage.fqn}[0].output_path}`,
+        filename: dataArchiveFileLambdaPackage.outputPath,
         functionName: "ts_lambda",
         handler: "index.handler",
-        layers: [`\${${awsLambdaLayerVersionThis.fqn}[0].arn}`],
+        layers:[ awsLambdaLayerVersionThis.arn],
         memorySize: 1024,
         role: awsIamRoleTsLambdaRole.arn,
         runtime: "nodejs18.x",
