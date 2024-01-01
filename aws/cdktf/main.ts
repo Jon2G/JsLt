@@ -68,7 +68,6 @@ You can read more about this at https://cdk.tf/variables*/
           "Whether to retain the old version of a previously deployed Lambda Layer.",
       }
     );
-    const mainDomain = ""
     const name = "jslt"
     const region = "us-east-1"
     const s3Bucket = new cdktf.TerraformVariable(this, "s3_bucket", {
