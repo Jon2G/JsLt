@@ -1,0 +1,21 @@
+{
+  "language": "typescript",
+  "app": "npx ts-node main.ts",
+  "projectId": "55b490cc-8363-4753-a603-6c02b27e00ad",
+  "sendCrashReports": "true",
+  "terraformProviders": [
+    "hashicorp/archive@~> 2.4",
+    "hashicorp/aws@~> 5.0",
+    "hashicorp/local@~> 2.4",
+    "hashicorp/random@~> 3.6",
+    "hashicorp/tls@~> 4.0"
+  ],
+  "terraformModules": [
+    "github.com/carrot/terraform-api-gateway-cors-module",
+    "terraform-aws-modules/vpc/aws"
+  ],
+  "context": {
+    "excludeStackIdFromLogicalIds": "true",
+    "allowSepCharsInLogicalIds": "true"
+  }
+}

@@ -1,0 +1,7 @@
+{
+    "vsintellicode.modelDownloadPath": "/tmp",
+    "vsintellicode.features.python.deepLearning": "enabled",
+    "typescript.format.enable": true,
+    "vsintellicode.typescript.completionsEnabled": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+}
