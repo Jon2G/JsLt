@@ -301,13 +301,13 @@ you need to keep this like it is.*/
       cidrBlock: publicSubnetCidr,
       vpcId: vpc.vpcIdOutput,
     });
-    console.log({ sourceDir: sourceDir.value })
-    const filesKeepers = fs.readdirSync(sourceDir.value).map((filename) => {
+    console.log({ sourceDir: sourceDir.default })
+    const filesKeepers = fs.readdirSync(sourceDir.default).map((filename) => {
       return {
         name: filename,
         md5: crypto
           .createHash("md5")
-          .update(fs.readFileSync(`${sourceDir.value}/${filename}`))
+          .update(fs.readFileSync(`${sourceDir.default}/${filename}`))
           .digest("hex"),
       };
     });
