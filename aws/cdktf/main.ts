@@ -340,7 +340,7 @@ you need to keep this like it is.*/
     const dataArchiveFileLambdaPackage =
       new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package", {
         outputFileMode: "0666",
-        outputPath: `./../terraform/zips/lambda_function_${randomUuidThis.fqn}.zip`,
+        outputPath: `./../terraform/zips/lambda_function_${randomUuidThis}.zip`,
         sourceDir: sourceDir,
         type: "zip",
       });
