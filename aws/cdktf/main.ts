@@ -304,12 +304,12 @@ you need to keep this like it is.*/
       cidrBlock: publicSubnetCidr,
       vpcId: vpc.vpcIdOutput,
     });
-    const filesKeepers = fs.readdirSync(packagesFolder).map((filename) => {
+    const filesKeepers = fs.readdirSync('./../packages/').map((filename) => {
       return {
         name: filename,
         md5: crypto
           .createHash("md5")
-          .update(fs.readFileSync(`${packagesFolder}/${filename}`))
+          .update(fs.readFileSync(`${'./../packages/'}${filename}`))
           .digest("hex"),
       };
     });
