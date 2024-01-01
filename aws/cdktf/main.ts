@@ -519,7 +519,7 @@ you need to keep this like it is.*/
         instanceType: "t2.micro",
         keyName: awsKeyPairTsLambda.keyName,
         //subnetId: `\${${vpc.publicSubnetsOutput.fqn}[0]}`,
-        subnetId: vpc.publicSubnetsOutput,
+        subnetId: vpc.publicSubnets![0], //.publicSubnetsOutput,
         tags: {
           Name: "docdb-bastion-vm",
         },
