@@ -565,7 +565,7 @@ you need to keep this like it is.*/
         dependsOn: [awsInstanceVictimEc2], //HERE
         environment: {
           variables: {
-            dbConnectionString: `mongodb://\${${awsDocdbClusterTsLambda.masterUsername}}:\${${awsDocdbClusterTsLambda.masterPassword}}@\${${awsDocdbClusterTsLambda.endpoint}}:\${${awsDocdbClusterTsLambda.port}}/jslt?tls=false&tlsCAFile=/opt/nodejs/docdb-bastion.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`,
+            dbConnectionString: `mongodb://${awsDocdbClusterTsLambda.masterUsername}:${awsDocdbClusterTsLambda.masterPassword}@${awsDocdbClusterTsLambda.endpoint}:${awsDocdbClusterTsLambda.port}/jslt?tls=false&tlsCAFile=/opt/nodejs/docdb-bastion.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`,
             testingIp: awsInstanceVictimEc2.privateIp,
           },
         },
