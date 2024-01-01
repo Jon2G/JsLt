@@ -40,7 +40,12 @@ You can read more about this at https://cdk.tf/variables*/
       profile: "jon2g-jslt",
       region: "us-east-1",
     });
-    const baseLayerZip = "./../lambda/layers/baseLayer.zip"
+    const awsFolder = "./../../../../";
+    const lambdaFolder = awsFolder + "lambda/";
+    const layersFolder = lambdaFolder + "layers/";
+    const packagesFolder = awsFolder + "packages/";
+    console.log({awsFolder,lambdaFolder,packagesFolder,layersFolder})
+    const baseLayerZip = layersFolder+"baseLayer.zip"
     const docdbInstanceClass = new cdktf.TerraformVariable(
       this,
       "docdb_instance_class",
@@ -66,12 +71,8 @@ You can read more about this at https://cdk.tf/variables*/
     const mainDomain = new cdktf.TerraformVariable(this, "main_domain", {
       default: "",
     });
-    const name = new cdktf.TerraformVariable(this, "name", {
-      default: "jslt",
-    });
-    const region = new cdktf.TerraformVariable(this, "region", {
-      default: "us-east-1",
-    });
+    const name = "jslt"
+    const region = "us-east-1"
     const s3Bucket = new cdktf.TerraformVariable(this, "s3_bucket", {
       default: "jslt-aws-s3-bucket-terraform-state",
     });
@@ -91,20 +92,20 @@ You can read more about this at https://cdk.tf/variables*/
     // new cdktf.TerraformOutput(this, "bucket_key", {
     //   value: `zips/lambda_function_\${${lambdasVersion.value}}.zip`,
     // });
-    const cdktfTerraformOutputName = new cdktf.TerraformOutput(
-      this,
-      "name_12",
-      {
-        value: name.value,
-      }
-    );
+    // const cdktfTerraformOutputName = new cdktf.TerraformOutput(
+    //   this,
+    //   "name_12",
+    //   {
+    //     value: name,
+    //   }
+    // );
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     cdktfTerraformOutputName.overrideLogicalId("name");
     const vpc = new Vpc.Vpc(this, "vpc", {
       azs: [
-        `\${${region.value}}a`,
-        `\${${region.value}}b`,
-        `\${${region.value}}c`,
+        `${region.value}a`,
+        `${region.value}b`,
+        `${region.value}c`,
       ],
       cidr: "10.0.0.0/16",
       enableDnsHostnames: true,
@@ -114,14 +115,14 @@ You can read more about this at https://cdk.tf/variables*/
       manageDefaultNetworkAcl: true,
       manageDefaultRouteTable: true,
       manageDefaultSecurityGroup: true,
-      name: `tf-\${${name.value}}`,
+      name: `tf-${name.value}`,
       privateSubnets: ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
       publicSubnets: ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"],
       singleNatGateway: false,
     });
     const awsApiGatewayRestApiTsLambda =
       new aws.apiGatewayRestApi.ApiGatewayRestApi(this, "ts_lambda", {
-        name: `tf-\${${name.value}}`,
+        name: `tf-${name.value}`,
       });
     const awsDocdbClusterParameterGroupTsLambda =
       new aws.docdbClusterParameterGroup.DocdbClusterParameterGroup(
@@ -129,7 +130,7 @@ You can read more about this at https://cdk.tf/variables*/
         "ts_lambda_15",
         {
           family: "docdb5.0",
-          name: `tf-\${${name.value}}`,
+          name: `tf-${name.value}`,
           parameter: [
             {
               name: "tls",
@@ -142,7 +143,7 @@ You can read more about this at https://cdk.tf/variables*/
     awsDocdbClusterParameterGroupTsLambda.overrideLogicalId("ts_lambda");
     const awsDocdbSubnetGroupTsLambda =
       new aws.docdbSubnetGroup.DocdbSubnetGroup(this, "ts_lambda_16", {
-        name: `tf-\${${name.value}}`,
+        name: `tf-${name.value}`,
         subnetIds: [vpc.privateSubnetsOutput],
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
@@ -191,7 +192,6 @@ You can read more about this at https://cdk.tf/variables*/
         prevent_destroy: false,
       },
     ]);
-    console.log({ baseLayerZip:baseLayerZip })
     const awsS3ObjectLayerPackage = new aws.s3Object.S3Object(
       this,
       "layer_package",
@@ -272,7 +272,7 @@ you need to keep this like it is.*/
             toPort: 22,
           },
         ],
-        name: `tf-\${${name.value}}-ssh`,
+        name: `tf-${name.value}-ssh`,
         vpcId: vpc.vpcIdOutput,
       }
     );
@@ -296,7 +296,7 @@ you need to keep this like it is.*/
             toPort: 0,
           },
         ],
-        name: `tf-\${${name.value}}`,
+        name: `tf-${name.value}`,
         vpcId: vpc.vpcIdOutput,
       }
     );
@@ -415,7 +415,7 @@ you need to keep this like it is.*/
       this,
       "ts_lambda_35",
       {
-        clusterIdentifier: `tf-\${${name.value}}`,
+        clusterIdentifier: `tf-${name.value}`,
         dbClusterParameterGroupName: awsDocdbClusterParameterGroupTsLambda.name,
         dbSubnetGroupName: awsDocdbSubnetGroupTsLambda.name,
         engine: "docdb",
@@ -430,7 +430,7 @@ you need to keep this like it is.*/
     const awsDocdbClusterInstanceTsLambda =
       new aws.docdbClusterInstance.DocdbClusterInstance(this, "ts_lambda_36", {
         clusterIdentifier: awsDocdbClusterTsLambda.id,
-        identifier: `tf-\${${name.value}}-\${count.index}`,
+        identifier: `tf-${name.value}-\${count.index}`,
         instanceClass: docdbInstanceClass.value,
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
@@ -441,7 +441,7 @@ you should consider using a for loop. If you are looping over something only kno
 you need to keep this like it is.*/
     awsDocdbClusterInstanceTsLambda.addOverride("count", 1);
     const awsKeyPairTsLambda = new aws.keyPair.KeyPair(this, "ts_lambda_37", {
-      keyName: `tf-\${${name.value}}-ec2`,
+      keyName: `tf-${name.value}-ec2`,
       publicKey: tlsPrivateKeyTsLambda.publicKeyOpenssh,
     });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
@@ -449,7 +449,7 @@ you need to keep this like it is.*/
     const awsLambdaLayerVersionThis =
       new aws.lambdaLayerVersion.LambdaLayerVersion(this, "this_38", {
         compatibleRuntimes: ["nodejs18.x"],
-        layerName: `\${${name.value}}-baseLayer`,
+        layerName: `${name.value}-baseLayer`,
         s3Bucket: s3Bucket.value,
         s3Key: `\${${awsS3ObjectLayerPackage.fqn}[0].key}`,
         s3ObjectVersion: `\${${awsS3ObjectLayerPackage.fqn}[0].version_id}`,
@@ -598,7 +598,7 @@ you need to keep this like it is.*/
       action: "lambda:InvokeFunction",
       functionName: awsLambdaFunctionTsLambda.arn,
       principal: "apigateway.amazonaws.com",
-      sourceArn: `arn:aws:execute-api:\${${region.value}}:\${${dataAwsCallerIdentityCurrent.accountId}}:\${${awsApiGatewayRestApiTsLambda.id}}/*/*`,
+      sourceArn: `arn:aws:execute-api:${region.value}:{${dataAwsCallerIdentityCurrent.accountId}:${awsApiGatewayRestApiTsLambda.id}/*/*`,
       statementId: "AllowAPIGatewayInvoke",
     });
     new cdktf.TerraformOutput(this, "aws_instance_public_dns", {
@@ -681,7 +681,7 @@ you need to keep this like it is.*/
       role: awsIamRoleTsLambdaRole.id,
     });
     new cdktf.TerraformOutput(this, "url", {
-      value: `\${${mainDomain.value} != "" ? "https://\${${name.value}}.\${${mainDomain.value}}" : "\${${awsApiGatewayDeploymentTsLambda.invokeUrl}}"}`,
+      value: `\${${mainDomain.value} != "" ? "https://${name.value}.\${${mainDomain.value}}" : "\${${awsApiGatewayDeploymentTsLambda.invokeUrl}}"}`,
     });
   }
 }
