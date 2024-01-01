@@ -203,7 +203,7 @@ You can read more about this at https://cdk.tf/variables*/
 not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
 you should consider using a for loop. If you are looping over something only known to Terraform, e.g. a result of a data source
 you need to keep this like it is.*/
-    awsS3ObjectLayerPackage.addOverride("count", 1);
+    //awsS3ObjectLayerPackage.addOverride("count", 1);
     const awsSecurityGroupAwsLinuxSg = new aws.securityGroup.SecurityGroup(
       this,
       "aws-linux-sg",
