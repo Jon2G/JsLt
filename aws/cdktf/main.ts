@@ -72,6 +72,9 @@ You can read more about this at https://cdk.tf/variables*/
     const sourceDir = new cdktf.TerraformVariable(this, "source_dir", {
       default: "./../packages",
     });
+    const lamdaFunctionsDir = new cdktf.TerraformVariable(this, "lamda_functions_dir", {
+      default: "./../lambda/functions",
+    });
     const awsAz = "us-east-1a";
     const linuxAssociatePublicIpAddress = true;
     const linuxDataVolumeSize = 10;
@@ -298,7 +301,7 @@ you need to keep this like it is.*/
       cidrBlock: publicSubnetCidr,
       vpcId: vpc.vpcIdOutput,
     });
-
+    console.log({ sourceDir: sourceDir.value })
     const filesKeepers = fs.readdirSync(sourceDir.value).map((filename) => {
       return {
         name: filename,
