@@ -428,7 +428,7 @@ you need to keep this like it is.*/
     const awsDocdbClusterInstanceTsLambda =
       new aws.docdbClusterInstance.DocdbClusterInstance(this, "ts_lambda_36", {
         clusterIdentifier: awsDocdbClusterTsLambda.id,
-        identifier: `tf-${name}-\${count.index}`,
+        identifier: `tf-${name}-${count.index}`,
         instanceClass: docdbInstanceClass.value,
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
