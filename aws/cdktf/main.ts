@@ -338,8 +338,8 @@ you need to keep this like it is.*/
     const dataArchiveFileLambdaPackage =
       new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package", {
         outputFileMode: "0666",
-        outputPath: `./../terraform/zips/lambda_function_${randomUuidThis}.zip`,
-        sourceDir: packagesFolder,
+        outputPath: terraformFolder +`/zips/lambda_function_${randomUuidThis}.zip`,
+        sourceDir:Fn.abspath(packagesFolder),
         type: "zip",
       });
     /*In most cases loops should be handled in the programming language context and 
