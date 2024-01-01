@@ -44,7 +44,8 @@ You can read more about this at https://cdk.tf/variables*/
     const lambdaFolder = awsFolder + "lambda/";
     const layersFolder = lambdaFolder + "layers/";
     const packagesFolder = awsFolder + "packages/";
-    console.log({awsFolder,lambdaFolder,packagesFolder,layersFolder})
+    const terraformFolder = awsFolder + "terraform/";
+    console.log({awsFolder,lambdaFolder,packagesFolder,layersFolder,terraformFolder})
     const baseLayerZip = layersFolder+"baseLayer.zip"
     const docdbInstanceClass = new cdktf.TerraformVariable(
       this,
@@ -554,7 +555,7 @@ you need to keep this like it is.*/
       tags: {
         Name: "linux-vm",
       },
-      userData: '${file("./ec2_victim/aws-user-data.sh")}',
+      userData:Fn.file(Fn.abspath(terraformFolder+"ec2_victim/aws-user-data.sh")),
       vpcSecurityGroupIds: [awsSecurityGroupAwsLinuxSg.id],
     });
     const awsLambdaFunctionTsLambda = new aws.lambdaFunction.LambdaFunction(
