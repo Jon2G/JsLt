@@ -139,14 +139,14 @@ You can read more about this at https://cdk.tf/variables*/
       const awsSubnetPublicSubnet = new aws.subnet.Subnet(this, "public-subnet", {
         availabilityZone: awsAz,
         cidrBlock: publicSubnetCidr,
-        vpcId: vpc.vpcIdOutput,
+        vpcId: vpc.vpcIdOutput
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsDocdbClusterParameterGroupTsLambda.overrideLogicalId("ts_lambda");
     const awsDocdbSubnetGroupTsLambda =
       new aws.docdbSubnetGroup.DocdbSubnetGroup(this, "ts_lambda_16", {
         name: `tf-${name}`,
-        subnetIds:[awsSubnetPublicSubnet.id] //vpc.privateSubnets??[] //[privateSubnetsOutput],
+        subnetIds:vpc.privateSubnets! //[awsSubnetPublicSubnet.id] //vpc.privateSubnets??[] //[privateSubnetsOutput],
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsDocdbSubnetGroupTsLambda.overrideLogicalId("ts_lambda");
@@ -518,7 +518,7 @@ you need to keep this like it is.*/
         instanceType: "t2.micro",
         keyName: awsKeyPairTsLambda.keyName,
         //subnetId: `\${${vpc.publicSubnetsOutput.fqn}[0]}`,
-        subnetId: vpc.publicSubnets![0], //.publicSubnetsOutput,
+        subnetId: vpc.vpcIdOutput,//vpc.publicSubnets![0], //.publicSubnetsOutput,
         tags: {
           Name: "docdb-bastion-vm",
         },
