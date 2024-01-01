@@ -68,9 +68,7 @@ You can read more about this at https://cdk.tf/variables*/
           "Whether to retain the old version of a previously deployed Lambda Layer.",
       }
     );
-    const mainDomain = new cdktf.TerraformVariable(this, "main_domain", {
-      default: "",
-    });
+    const mainDomain = ""
     const name = "jslt"
     const region = "us-east-1"
     const s3Bucket = new cdktf.TerraformVariable(this, "s3_bucket", {
@@ -681,7 +679,7 @@ you need to keep this like it is.*/
       role: awsIamRoleTsLambdaRole.id,
     });
     new cdktf.TerraformOutput(this, "url", {
-      value: `\${${mainDomain.value} != "" ? "https://${name}.\${${mainDomain.value}}" : "\${${awsApiGatewayDeploymentTsLambda.invokeUrl}}"}`,
+      value: awsApiGatewayDeploymentTsLambda.invokeUrl,
     });
   }
 }
