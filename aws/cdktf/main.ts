@@ -144,7 +144,7 @@ You can read more about this at https://cdk.tf/variables*/
       });
       const awsSubnetPublicSubnet2 = new aws.subnet.Subnet(this, "public-subnet2", {
         availabilityZone: awsBz,
-        cidrBlock: publicSubnetCidr,
+        cidrBlock: "10.1.104.0/24",
         vpcId: vpc.vpcIdOutput
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
