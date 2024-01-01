@@ -79,6 +79,7 @@ You can read more about this at https://cdk.tf/variables*/
     //   default: "./../lambda/functions",
     // });
     const awsAz = "us-east-1a";
+    const awsBz = "us-east-1b";
     const linuxAssociatePublicIpAddress = true;
     const linuxDataVolumeSize = 10;
     const linuxDataVolumeType = "gp2";
@@ -141,12 +142,17 @@ You can read more about this at https://cdk.tf/variables*/
         cidrBlock: publicSubnetCidr,
         vpcId: vpc.vpcIdOutput
       });
+      const awsSubnetPublicSubnet2 = new aws.subnet.Subnet(this, "public-subnet", {
+        availabilityZone: awsAz,
+        cidrBlock: publicSubnetCidr,
+        vpcId: vpc.vpcIdOutput
+      });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsDocdbClusterParameterGroupTsLambda.overrideLogicalId("ts_lambda");
     const awsDocdbSubnetGroupTsLambda =
       new aws.docdbSubnetGroup.DocdbSubnetGroup(this, "ts_lambda_16", {
         name: `tf-${name}`,
-        subnetIds:[awsSubnetPublicSubnet.id] //vpc.privateSubnets! //[awsSubnetPublicSubnet.id] //vpc.privateSubnets??[] //[privateSubnetsOutput],
+        subnetIds:[awsSubnetPublicSubnet.id,awsSubnetPublicSubnet2.id] //vpc.privateSubnets! //[awsSubnetPublicSubnet.id] //vpc.privateSubnets??[] //[privateSubnetsOutput],
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsDocdbSubnetGroupTsLambda.overrideLogicalId("ts_lambda");
