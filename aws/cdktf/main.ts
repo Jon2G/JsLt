@@ -142,7 +142,7 @@ You can read more about this at https://cdk.tf/variables*/
     const awsDocdbSubnetGroupTsLambda =
       new aws.docdbSubnetGroup.DocdbSubnetGroup(this, "ts_lambda_16", {
         name: `tf-${name}`,
-        subnetIds: [vpc.privateSubnetsOutput],
+        subnetIds: vpc.privateSubnets??[] //[privateSubnetsOutput],
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsDocdbSubnetGroupTsLambda.overrideLogicalId("ts_lambda");
@@ -579,7 +579,7 @@ you need to keep this like it is.*/
         timeout: 300,
         vpcConfig: {
           securityGroupIds: [awsSecurityGroupTsLambda.id],
-          subnetIds: [vpc.publicSubnetsOutput],
+          subnetIds:vpc.publicSubnets??[] //[vpc.publicSubnetsOutput],
         },
       }
     );
