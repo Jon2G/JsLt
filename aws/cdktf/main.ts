@@ -80,9 +80,9 @@ You can read more about this at https://cdk.tf/variables*/
     const sourceDir = new cdktf.TerraformVariable(this, "source_dir", {
       default: "./../packages",
     });
-    const lamdaFunctionsDir = new cdktf.TerraformVariable(this, "lamda_functions_dir", {
-      default: "./../lambda/functions",
-    });
+    // const lamdaFunctionsDir = new cdktf.TerraformVariable(this, "lamda_functions_dir", {
+    //   default: "./../lambda/functions",
+    // });
     const awsAz = "us-east-1a";
     const linuxAssociatePublicIpAddress = true;
     const linuxDataVolumeSize = 10;
