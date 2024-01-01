@@ -10,6 +10,7 @@
     "build": "tsc",
     "synth": "export NODE_OPTIONS='--max_old_space_size=20384' && cdktf synth cdktf synth",
     "compile": "tsc --pretty",
+    "deploy": "export NODE_OPTIONS='--max_old_space_size=20384' && cdktf deploy --auto-approve",
     "watch": "tsc -w",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -24,6 +25,7 @@
     "constructs": "^10.3.0",
     "crypto": "^1.0.1",
     "fs": "^0.0.1-security",
+    "path": "^0.12.7",
     "prettier": "^3.1.1"
   },
   "devDependencies": {

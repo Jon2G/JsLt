@@ -40,9 +40,7 @@ You can read more about this at https://cdk.tf/variables*/
       profile: "jon2g-jslt",
       region: "us-east-1",
     });
-    const baseLayerZip = new cdktf.TerraformVariable(this, "baseLayerZip", {
-      default: "./../lambda/layers/baseLayer.zip",
-    });
+    const baseLayerZip = "./../lambda/layers/baseLayer.zip"
     const docdbInstanceClass = new cdktf.TerraformVariable(
       this,
       "docdb_instance_class",
@@ -53,9 +51,9 @@ You can read more about this at https://cdk.tf/variables*/
     const docdbPassword = new cdktf.TerraformVariable(this, "docdb_password", {
       default: "689865541998",
     });
-    const lambdasVersion = new cdktf.TerraformVariable(this, "lambdasVersion", {
-      description: "version of the lambdas zip on S3",
-    });
+    // const lambdasVersion = new cdktf.TerraformVariable(this, "lambdasVersion", {
+    //   description: "version of the lambdas zip on S3",
+    // });
     const layerSkipDestroy = new cdktf.TerraformVariable(
       this,
       "layer_skip_destroy",
@@ -77,9 +75,8 @@ You can read more about this at https://cdk.tf/variables*/
     const s3Bucket = new cdktf.TerraformVariable(this, "s3_bucket", {
       default: "jslt-aws-s3-bucket-terraform-state",
     });
-    const sourceDir = new cdktf.TerraformVariable(this, "source_dir", {
-      default: "./../packages",
-    });
+
+   const sourceDir = "./../packages"
     // const lamdaFunctionsDir = new cdktf.TerraformVariable(this, "lamda_functions_dir", {
     //   default: "./../lambda/functions",
     // });
@@ -91,9 +88,9 @@ You can read more about this at https://cdk.tf/variables*/
     const linuxRootVolumeSize = 20;
     const linuxRootVolumeType = "gp2";
     const publicSubnetCidr = "10.0.104.0/24";
-    new cdktf.TerraformOutput(this, "bucket_key", {
-      value: `zips/lambda_function_\${${lambdasVersion.value}}.zip`,
-    });
+    // new cdktf.TerraformOutput(this, "bucket_key", {
+    //   value: `zips/lambda_function_\${${lambdasVersion.value}}.zip`,
+    // });
     const cdktfTerraformOutputName = new cdktf.TerraformOutput(
       this,
       "name_12",
@@ -194,14 +191,15 @@ You can read more about this at https://cdk.tf/variables*/
         prevent_destroy: false,
       },
     ]);
+    console.log({ baseLayerZip:baseLayerZip })
     const awsS3ObjectLayerPackage = new aws.s3Object.S3Object(
       this,
       "layer_package",
       {
         bucket: s3Bucket.value,
-        key: `\${basename(abspath(${baseLayerZip.value}))}`,
-        source: `\${abspath(${baseLayerZip.value})}`,
-        sourceHash: `\${filemd5(abspath(${baseLayerZip.value}))}`,
+        key: "${basename(abspath('"+baseLayerZip+"'))}",
+        source: "${abspath('"+baseLayerZip+"')}",
+        sourceHash: "${filemd5(abspath('"+baseLayerZip+"'))}",
       }
     );
     /*In most cases loops should be handled in the programming language context and 
@@ -309,13 +307,13 @@ you need to keep this like it is.*/
       cidrBlock: publicSubnetCidr,
       vpcId: vpc.vpcIdOutput,
     });
-    console.log({ sourceDir: sourceDir.default })
-    const filesKeepers = fs.readdirSync(sourceDir.default).map((filename) => {
+    console.log({ sourceDir: sourceDir })
+    const filesKeepers = fs.readdirSync(sourceDir).map((filename) => {
       return {
         name: filename,
         md5: crypto
           .createHash("md5")
-          .update(fs.readFileSync(`${sourceDir.default}/${filename}`))
+          .update(fs.readFileSync(`${sourceDir}/${filename}`))
           .digest("hex"),
       };
     });
@@ -325,10 +323,6 @@ you need to keep this like it is.*/
     }
     const randomUuidThis = new random.uuid.Uuid(this, "this", {
       keepers: keepers,
-      //      `\${{
-      //   for filename in fileset(${sourceDir.value}, "**/*") :
-      //   filename => filemd5("\${var.source_dir}/\${filename}")
-      // }}`,
     });
     /*In most cases loops should be handled in the programming language context and 
 not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
@@ -348,8 +342,8 @@ you need to keep this like it is.*/
     const dataArchiveFileLambdaPackage =
       new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package", {
         outputFileMode: "0666",
-        outputPath: `\${${sourceDir.value}}/../terraform/zips/lambda_function_\${try(${randomUuidThis.fqn}[0].result, "")}.zip`,
-        sourceDir: sourceDir.value,
+        outputPath: `./../terraform/zips/lambda_function_${randomUuidThis.fqn}.zip`,
+        sourceDir: sourceDir,
         type: "zip",
       });
     /*In most cases loops should be handled in the programming language context and 
@@ -460,7 +454,7 @@ you need to keep this like it is.*/
         s3Key: `\${${awsS3ObjectLayerPackage.fqn}[0].key}`,
         s3ObjectVersion: `\${${awsS3ObjectLayerPackage.fqn}[0].version_id}`,
         skipDestroy: layerSkipDestroy.value,
-        sourceCodeHash: `\${filebase64sha256(${baseLayerZip.value})}`,
+        sourceCodeHash: `\${filebase64sha256(${baseLayerZip})}`,
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsLambdaLayerVersionThis.overrideLogicalId("this");
