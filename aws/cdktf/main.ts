@@ -594,7 +594,7 @@ you need to keep this like it is.*/
       action: "lambda:InvokeFunction",
       functionName: awsLambdaFunctionTsLambda.arn,
       principal: "apigateway.amazonaws.com",
-      sourceArn: "arn:aws:execute-api:"+region+":{"+dataAwsCallerIdentityCurrent.accountId+":"+awsApiGatewayRestApiTsLambda.id+"/*/*",
+      sourceArn: "arn:aws:execute-api:"+region+":"+dataAwsCallerIdentityCurrent.accountId+":"+awsApiGatewayRestApiTsLambda.id+"/*/*",
       statementId: "AllowAPIGatewayInvoke",
     });
     new cdktf.TerraformOutput(this, "aws_instance_public_dns", {
