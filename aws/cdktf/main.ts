@@ -326,7 +326,7 @@ you need to keep this like it is.*/
 not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
 you should consider using a for loop. If you are looping over something only known to Terraform, e.g. a result of a data source
 you need to keep this like it is.*/
-    randomUuidThis.addOverride("count", 1);
+    //randomUuidThis.addOverride("count", 1);
     const tlsPrivateKeyTsLambda = new tls.privateKey.PrivateKey(
       this,
       "ts_lambda_27",
@@ -348,7 +348,7 @@ you need to keep this like it is.*/
 not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
 you should consider using a for loop. If you are looping over something only known to Terraform, e.g. a result of a data source
 you need to keep this like it is.*/
-    dataArchiveFileLambdaPackage.addOverride("count", 1);
+    //dataArchiveFileLambdaPackage.addOverride("count", 1);
     const dataAwsAmiLatestAmzLinux = new aws.dataAwsAmi.DataAwsAmi(
       this,
       "latest_amz_linux",
@@ -437,7 +437,7 @@ you need to keep this like it is.*/
 not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
 you should consider using a for loop. If you are looping over something only known to Terraform, e.g. a result of a data source
 you need to keep this like it is.*/
-    awsDocdbClusterInstanceTsLambda.addOverride("count", 1);
+   //awsDocdbClusterInstanceTsLambda.addOverride("count", 1);
     const awsKeyPairTsLambda = new aws.keyPair.KeyPair(this, "ts_lambda_37", {
       keyName: `tf-${name}-ec2`,
       publicKey: tlsPrivateKeyTsLambda.publicKeyOpenssh,
@@ -460,7 +460,7 @@ you need to keep this like it is.*/
 not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
 you should consider using a for loop. If you are looping over something only known to Terraform, e.g. a result of a data source
 you need to keep this like it is.*/
-    awsLambdaLayerVersionThis.addOverride("count", 1);
+    //awsLambdaLayerVersionThis.addOverride("count", 1);
     new aws.routeTableAssociation.RouteTableAssociation(
       this,
       "public-rt-association",
@@ -640,7 +640,7 @@ you need to keep this like it is.*/
         this,
         "ts_lambda_loggroup",
         {
-          name: `/aws/lambda/\${${awsLambdaFunctionTsLambda.functionName}}`,
+          name:awsLambdaFunctionTsLambda.functionName, //`/aws/lambda/${awsLambdaFunctionTsLambda.functionName}`,
           retentionInDays: 3,
         }
       );
@@ -654,7 +654,7 @@ you need to keep this like it is.*/
               actions: ["logs:CreateLogStream", "logs:PutLogEvents"],
               resources: [
                 awsCloudwatchLogGroupTsLambdaLoggroup.arn,
-                `\${${awsCloudwatchLogGroupTsLambdaLoggroup.arn}}:*`,
+                `${awsCloudwatchLogGroupTsLambdaLoggroup.arn}:*`,
               ],
             },
           ],
