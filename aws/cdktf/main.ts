@@ -75,7 +75,6 @@ You can read more about this at https://cdk.tf/variables*/
       default: "jslt-aws-s3-bucket-terraform-state",
     });
 
-   const sourceDir = "./../packages"
     // const lamdaFunctionsDir = new cdktf.TerraformVariable(this, "lamda_functions_dir", {
     //   default: "./../lambda/functions",
     // });
@@ -305,13 +304,12 @@ you need to keep this like it is.*/
       cidrBlock: publicSubnetCidr,
       vpcId: vpc.vpcIdOutput,
     });
-    console.log({ sourceDir: sourceDir })
-    const filesKeepers = fs.readdirSync(sourceDir).map((filename) => {
+    const filesKeepers = fs.readdirSync(packagesFolder).map((filename) => {
       return {
         name: filename,
         md5: crypto
           .createHash("md5")
-          .update(fs.readFileSync(`${sourceDir}/${filename}`))
+          .update(fs.readFileSync(`${packagesFolder}/${filename}`))
           .digest("hex"),
       };
     });
@@ -341,7 +339,7 @@ you need to keep this like it is.*/
       new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package", {
         outputFileMode: "0666",
         outputPath: `./../terraform/zips/lambda_function_${randomUuidThis}.zip`,
-        sourceDir: sourceDir,
+        sourceDir: packagesFolder,
         type: "zip",
       });
     /*In most cases loops should be handled in the programming language context and 
