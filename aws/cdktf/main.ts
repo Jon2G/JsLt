@@ -142,7 +142,7 @@ You can read more about this at https://cdk.tf/variables*/
         cidrBlock: publicSubnetCidr,
         vpcId: vpc.vpcIdOutput
       });
-      const awsSubnetPublicSubnet2 = new aws.subnet.Subnet(this, "public-subnet", {
+      const awsSubnetPublicSubnet2 = new aws.subnet.Subnet(this, "public-subnet2", {
         availabilityZone: awsBz,
         cidrBlock: publicSubnetCidr,
         vpcId: vpc.vpcIdOutput
