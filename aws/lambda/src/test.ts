@@ -1,4 +1,4 @@
-import { lt_fetch } from "./metricsLayer/fetchLayer";
+import { lt_fetch } from "shared/metricsLayer/fetchLayer";
 import { faker, tr } from "@faker-js/faker";
 import { authenticator } from "otplib";
 

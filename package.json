@@ -1,11 +1,13 @@
 {
-  "name": "lambda",
+  "name": "jslt",
   "version": "1.0.0",
-  "description": "",
+  "description": "Desarrollo de una plataforma para la ejecución de pruebas de carga a partir de la definición de un script con JavaScript",
   "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +22,7 @@
     "mongodb": "^6.3.0",
     "otplib": "^12.0.1",
     "ts-node": "^10.9.2",
-    "typesafe": "file:./../../types"
+    "typesafe": "file:./types",
+    "shared": "file:./shared"
   }
 }

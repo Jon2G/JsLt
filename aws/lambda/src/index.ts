@@ -5,7 +5,7 @@ import {
   APIGatewayProxyResult,
   APIGatewayEvent,
 } from "aws-lambda";
-import HandlerEntryPoint from "./lambdaContext/handlerWrapper";
+import HandlerEntryPoint from "shared/lambdaContext/handlerWrapper";
 import { testRun } from "./test";
 
 export function handler(
