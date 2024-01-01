@@ -449,8 +449,8 @@ you need to keep this like it is.*/
         compatibleRuntimes: ["nodejs18.x"],
         layerName: `${name}-baseLayer`,
         s3Bucket: s3Bucket.value,
-        s3Key: `\${${awsS3ObjectLayerPackage.fqn}[0].key}`,
-        s3ObjectVersion: `\${${awsS3ObjectLayerPackage.fqn}[0].version_id}`,
+        s3Key: awsS3ObjectLayerPackage.key,
+        s3ObjectVersion:awsS3ObjectLayerPackage.versionId,
         skipDestroy: layerSkipDestroy.value,
         sourceCodeHash:Fn.filebase64sha256(baseLayerZip),
       });
