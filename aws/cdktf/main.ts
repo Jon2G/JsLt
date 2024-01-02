@@ -90,6 +90,7 @@ class MyStack extends TerraformStack {
     }
   }
   private addLambdaFunction(lambdaInfo:LambdaFuntionInfo){
+    console.log({lambdaInfo})
     const dataArchiveFileLambdaPackage =
     new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package_"+lambdaInfo.name, {
       outputFileMode: "0666",
@@ -102,7 +103,7 @@ class MyStack extends TerraformStack {
 
     const awsLambdaFunctionTsLambda = new aws.lambdaFunction.LambdaFunction(
       this,
-      "ts_lambda_48",
+      "ts_lambda_"+lambdaInfo.name,
       {
         dependsOn:[this.awsInstanceVictimEc2],
         environment: {
@@ -128,16 +129,14 @@ class MyStack extends TerraformStack {
         }
       }
     );
-    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsLambdaFunctionTsLambda.overrideLogicalId("ts_lambda");
-    new aws.lambdaFunctionUrl.LambdaFunctionUrl(this, "ts_lambda_funtion_url", {
+    new aws.lambdaFunctionUrl.LambdaFunctionUrl(this, "ts_lambda_funtion_url_"+lambdaInfo.name, {
       authorizationType: "NONE",
       cors: {
         allowOrigins: ["*"],
       },
       functionName: awsLambdaFunctionTsLambda.id,
     });
-    new aws.lambdaPermission.LambdaPermission(this, "apigw", {
+    new aws.lambdaPermission.LambdaPermission(this, "apigw_"+lambdaInfo.name, {
       action: "lambda:InvokeFunction",
       functionName: awsLambdaFunctionTsLambda.arn,
       principal: "apigateway.amazonaws.com",
@@ -152,7 +151,7 @@ class MyStack extends TerraformStack {
           const awsApiGatewayIntegrationTsLambda =
       new aws.apiGatewayIntegration.ApiGatewayIntegration(
         this,
-        "ts_lambda_53",
+        "ts_lambda_agi_"+lambdaInfo.name,
         {
           httpMethod: this.awsApiGatewayMethodTsLambda.httpMethod,
           integrationHttpMethod: "POST",
@@ -162,12 +161,11 @@ class MyStack extends TerraformStack {
           uri: awsLambdaFunctionTsLambda.invokeArn,
         }
       );
-    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsApiGatewayIntegrationTsLambda.overrideLogicalId("ts_lambda");
-    const awsApiGatewayIntegrationTsLambdaRoot =
+
+    //const awsApiGatewayIntegrationTsLambdaRoot =
       new aws.apiGatewayIntegration.ApiGatewayIntegration(
         this,
-        "ts_lambda_root_54",
+        "ts_lambda_root_"+lambdaInfo.name,
         {
           httpMethod: this.awsApiGatewayMethodTsLambdaRoot.httpMethod,
           integrationHttpMethod: "POST",
@@ -177,12 +175,10 @@ class MyStack extends TerraformStack {
           uri: awsLambdaFunctionTsLambda.invokeArn,
         }
       );
-    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsApiGatewayIntegrationTsLambdaRoot.overrideLogicalId("ts_lambda_root");
     const awsCloudwatchLogGroupTsLambdaLoggroup =
       new aws.cloudwatchLogGroup.CloudwatchLogGroup(
         this,
-        "ts_lambda_loggroup",
+        "ts_lambda_loggroup_"+lambdaInfo.name,
         {
           name:awsLambdaFunctionTsLambda.functionName, //`/aws/lambda/${awsLambdaFunctionTsLambda.functionName}`,
           retentionInDays: 3,
@@ -191,7 +187,7 @@ class MyStack extends TerraformStack {
     const dataAwsIamPolicyDocumentTsLambdaPolicy =
       new aws.dataAwsIamPolicyDocument.DataAwsIamPolicyDocument(
         this,
-        "ts_lambda_policy",
+        "ts_lambda_policy_"+lambdaInfo.name,
         {
           statement: [
             {
@@ -205,7 +201,7 @@ class MyStack extends TerraformStack {
         }
       );
     const awsApiGatewayDeploymentTsLambda =
-      new aws.apiGatewayDeployment.ApiGatewayDeployment(this, "ts_lambda_57", {
+      new aws.apiGatewayDeployment.ApiGatewayDeployment(this, "ts_lambda_agd_"+lambdaInfo.name, {
         dependsOn:
         //HERE
         [
@@ -215,14 +211,12 @@ class MyStack extends TerraformStack {
         restApiId: this.awsApiGatewayRestApiTsLambda.id,
         stageName: this.name,
       });
-    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsApiGatewayDeploymentTsLambda.overrideLogicalId("ts_lambda");
-    new aws.iamRolePolicy.IamRolePolicy(this, "ts_lambda_role_policy", {
-      name: "my-lambda-policy",
+    new aws.iamRolePolicy.IamRolePolicy(this, "ts_lambda_role_policy_"+lambdaInfo.name, {
+      name: "my-lambda-policy_"+lambdaInfo.name,
       policy: dataAwsIamPolicyDocumentTsLambdaPolicy.json,
       role: this.awsIamRoleTsLambdaRole.id,
     });
-    new cdktf.TerraformOutput(this, "url", {
+    new cdktf.TerraformOutput(this, "url_"+lambdaInfo.name, {
       value: awsApiGatewayDeploymentTsLambda.invokeUrl,
     });
   }

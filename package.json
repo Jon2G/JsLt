@@ -9,8 +9,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "bundle": "ts-node ./aws/cdktf/run-bundle.ts",
-    "synth-win": "set NODE_OPTIONS='--max_old_space_size=20384' && cd ./aws/cdktf && cdktf synth",
-    "synth": "export NODE_OPTIONS='--max_old_space_size=20384' && cd ./aws/cdktf && cdktf synth"
+    "synth": "export NODE_OPTIONS='--max_old_space_size=20384' && cd ./aws/cdktf && cdktf synth",
+    "deploy": "export NODE_OPTIONS='--max_old_space_size=20384' && cd ./aws/cdktf && cdktf deploy --auto-approve",
+    "bundle-deploy": "npm run bundle && npm run deploy"
   },
   "author": "",
   "license": "ISC",
