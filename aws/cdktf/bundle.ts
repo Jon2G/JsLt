@@ -21,7 +21,7 @@ export function getLambdaFunctionsFromFolders(lambdaFunctionsFolder:string,terra
       }
       return lambdaInfo
     })
-    .filter((x) => fs.lstatSync(x.srcDir).isDirectory())
+    .filter((x) => fs.lstatSync(x.srcDir).isDirectory() && fs.existsSync(path.join(x.srcDir,'index.ts')))
     return functions
   }
 
