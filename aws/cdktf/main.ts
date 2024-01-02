@@ -91,7 +91,7 @@ class MyStack extends TerraformStack {
   }
   private addLambdaFunction(lambdaInfo:LambdaFuntionInfo){
     const dataArchiveFileLambdaPackage =
-    new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package", {
+    new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package_"+lambdaInfo.name, {
       outputFileMode: "0666",
       outputPath:lambdaInfo.zipPath,
       sourceDir:Fn.abspath(lambdaInfo.compilePath),
