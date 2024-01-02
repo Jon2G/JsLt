@@ -4,12 +4,12 @@ See https://cdk.tf/provider-generation for more details.*/
 import * as archive from "./.gen/providers/archive";
 import * as aws from "./.gen/providers/aws";
 import * as local from "./.gen/providers/local";
-import * as random from "./.gen/providers/random";
+//import * as random from "./.gen/providers/random";
 import * as tls from "./.gen/providers/tls";
 import * as TerraformApiGatewayCorsModule from "./.gen/modules/carrot/terraform-api-gateway-cors-module";
 import * as Vpc from "./.gen/modules/terraform-aws-modules/aws/vpc";
-import * as fs from "fs";
-import * as crypto from "crypto";
+// import * as fs from "fs";
+// import * as crypto from "crypto";
 
 // Copyright (c) HashiCorp, Inc
 // SPDX-License-Identifier: MPL-2.0
@@ -19,50 +19,113 @@ import { ArchiveProvider } from "./.gen/providers/archive/provider";
 import { RandomProvider } from "./.gen/providers/random/provider";
 import { LocalProvider } from "./.gen/providers/local/provider";
 import { TlsProvider } from "./.gen/providers/tls/provider";
+import { DocdbCluster } from "./.gen/providers/aws/docdb-cluster";
+import { LambdaFuntionInfo, getLambdaFunctionsFromFolders } from "./bundle";
+import path = require("path");
+
+
 
 class MyStack extends TerraformStack {
 
-  private getLambdaFolders(path:string){
-    const functions = []
-    const folders = fs.readdirSync(path)
-    .map(file=>{
-      return {
-        fullPath:path.join(path,file),
-        folderName:file
-      }
-    })
-    .filter((x) => fs.lstatSync(x.fullPath).isDirectory())
-    for(const lambdaFolder of folders){
-      this.addLambdaFunction(lambdaFolder.fullPath,lambdaFolder.folderName)
+  private awsDocdbClusterTsLambda:DocdbCluster
+  private awsInstanceVictimEc2: aws.instance.Instance
+  private awsLambdaLayerVersionThis: aws.lambdaLayerVersion.LambdaLayerVersion
+  private awsIamRoleTsLambdaRole:aws.iamRole.IamRole
+  private awsSecurityGroupTsLambda: aws.securityGroup.SecurityGroup
+  private awsSubnetPublicSubnet: aws.subnet.Subnet
+  private awsSubnetPublicSubnet2: aws.subnet.Subnet
+  private dataAwsCallerIdentityCurrent: aws.dataAwsCallerIdentity.DataAwsCallerIdentity
+  private awsApiGatewayRestApiTsLambda: aws.apiGatewayRestApi.ApiGatewayRestApi
+  private awsApiGatewayMethodTsLambda: aws.apiGatewayMethod.ApiGatewayMethod
+  private awsApiGatewayMethodTsLambdaRoot:aws.apiGatewayMethod.ApiGatewayMethod
+  private cors: TerraformApiGatewayCorsModule.TerraformApiGatewayCorsModule
+
+  private currentDir = path.resolve("./");
+  private awsFolder:string = path.resolve("./../../../../");
+  private lambdaFolder:string =path.join( this.awsFolder , "lambda/")
+  private lambdaFunctionsFolder:string = path.join(this.awsFolder , "lambda/functions")
+  private layersFolder:string =path.join( this.lambdaFolder , "layers/")
+  private packagesFolder:string =path.join( this.awsFolder , "packages/")
+  private terraformFolder:string =path.join( this.awsFolder , "terraform/")
+  private baseLayerZip:string =path.join( this.layersFolder,"baseLayer.zip")
+  private readonly name = "jslt"
+  private readonly  region = "us-east-1"
+  private readonly  awsAz = "us-east-1a";
+  private readonly  awsBz = "us-east-1b";
+  private readonly  linuxAssociatePublicIpAddress = true;
+  private readonly  linuxDataVolumeSize = 10;
+  private readonly  linuxDataVolumeType = "gp2";
+  private readonly  linuxInstanceType = "t2.micro";
+  private readonly  linuxRootVolumeSize = 20;
+  private readonly  linuxRootVolumeType = "gp2";
+  private readonly  publicSubnetCidr = "10.0.104.0/24";
+
+
+
+
+  // private getRandomUuid() {
+  //   const filesKeepers = fs.readdirSync('./../packages/').map((filename) => {
+  //     return {
+  //       name: filename,
+  //       md5: crypto
+  //         .createHash("md5")
+  //         .update(fs.readFileSync(`${'./../packages/'}${filename}`))
+  //         .digest("hex"),
+  //     };
+  //   });
+  //   const keepers: { [key: string]: string } = {};
+  //   for (const file of filesKeepers) {
+  //     keepers[file.name] = file.md5;
+  //   }
+  //   const randomUuidThis = new random.uuid.Uuid(this, "this", {
+  //     keepers: keepers,
+  //   });
+  //   return randomUuidThis
+  // }
+
+  private addLambdaFunctions(){
+    const functions:LambdaFuntionInfo[] = getLambdaFunctionsFromFolders(this.lambdaFunctionsFolder,this.terraformFolder,this.packagesFolder)
+    for (const lambdaInfo of functions) {
+      this.addLambdaFunction(lambdaInfo)
     }
   }
+  private addLambdaFunction(lambdaInfo:LambdaFuntionInfo){
+    const dataArchiveFileLambdaPackage =
+    new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package", {
+      outputFileMode: "0666",
+      outputPath:lambdaInfo.zipPath,
+      sourceDir:Fn.abspath(lambdaInfo.compilePath),
+      type: "zip",
+    });
 
-  private addLambdaFunction(path:string,name:string){
 
 
     const awsLambdaFunctionTsLambda = new aws.lambdaFunction.LambdaFunction(
       this,
       "ts_lambda_48",
       {
-        dependsOn: [awsInstanceVictimEc2], //HERE
+        dependsOn:[this.awsInstanceVictimEc2],
         environment: {
           variables: {
-            dbConnectionString: `mongodb://${awsDocdbClusterTsLambda.masterUsername}:${awsDocdbClusterTsLambda.masterPassword}@${awsDocdbClusterTsLambda.endpoint}:${awsDocdbClusterTsLambda.port}/jslt?tls=false&tlsCAFile=/opt/nodejs/docdb-bastion.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`,
-            testingIp: awsInstanceVictimEc2.privateIp,
+            dbConnectionString: `mongodb://${this.awsDocdbClusterTsLambda.masterUsername}:${this.awsDocdbClusterTsLambda.masterPassword}@${this.awsDocdbClusterTsLambda.endpoint}:${this.awsDocdbClusterTsLambda.port}/jslt?tls=false&tlsCAFile=/opt/nodejs/docdb-bastion.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`,
+            testingIp: this.awsInstanceVictimEc2.privateIp,
           },
         },
         filename: dataArchiveFileLambdaPackage.outputPath,
-        functionName: "ts_lambda",
+        functionName: lambdaInfo.name,
         handler: "index.handler",
-        layers:[ awsLambdaLayerVersionThis.arn],
+        layers:[this.awsLambdaLayerVersionThis.arn],
         memorySize: 1024,
-        role: awsIamRoleTsLambdaRole.arn,
+        role: this.awsIamRoleTsLambdaRole.arn,
         runtime: "nodejs18.x",
         timeout: 300,
         vpcConfig: {
-          securityGroupIds: [awsSecurityGroupTsLambda.id],
-          subnetIds:[awsSubnetPublicSubnet.id,awsSubnetPublicSubnet2.id], //vpc.publicSubnets??[] //[vpc.publicSubnetsOutput],
+          securityGroupIds: [this.awsSecurityGroupTsLambda.id],
+          subnetIds:[this.awsSubnetPublicSubnet.id,this.awsSubnetPublicSubnet2.id], //vpc.publicSubnets??[] //[vpc.publicSubnetsOutput],
         },
+        tags:{
+          Name:lambdaInfo.name
+        }
       }
     );
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
@@ -78,38 +141,95 @@ class MyStack extends TerraformStack {
       action: "lambda:InvokeFunction",
       functionName: awsLambdaFunctionTsLambda.arn,
       principal: "apigateway.amazonaws.com",
-      sourceArn: "arn:aws:execute-api:"+region+":"+dataAwsCallerIdentityCurrent.accountId+":"+awsApiGatewayRestApiTsLambda.id+"/*/*",
+      sourceArn: "arn:aws:execute-api:"+this.region+":"+this.dataAwsCallerIdentityCurrent.accountId+":"+this.awsApiGatewayRestApiTsLambda.id+"/*/*",
       statementId: "AllowAPIGatewayInvoke",
     });
     
-        const filesKeepers = fs.readdirSync('./../packages/').map((filename) => {
-          return {
-            name: filename,
-            md5: crypto
-              .createHash("md5")
-              .update(fs.readFileSync(`${'./../packages/'}${filename}`))
-              .digest("hex"),
-          };
-        });
-        const keepers: { [key: string]: string } = {};
-        for (const file of filesKeepers) {
-          keepers[file.name] = file.md5;
+
+
+
+
+          const awsApiGatewayIntegrationTsLambda =
+      new aws.apiGatewayIntegration.ApiGatewayIntegration(
+        this,
+        "ts_lambda_53",
+        {
+          httpMethod: this.awsApiGatewayMethodTsLambda.httpMethod,
+          integrationHttpMethod: "POST",
+          resourceId: this.awsApiGatewayMethodTsLambda.resourceId,
+          restApiId: this.awsApiGatewayRestApiTsLambda.id,
+          type: "AWS_PROXY",
+          uri: awsLambdaFunctionTsLambda.invokeArn,
         }
-        const randomUuidThis = new random.uuid.Uuid(this, "this", {
-          keepers: keepers,
-        });
-        const dataArchiveFileLambdaPackage =
-          new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package", {
-            outputFileMode: "0666",
-            outputPath: terraformFolder +`/zips/lambda_function_${randomUuidThis}.zip`,
-            sourceDir:Fn.abspath(packagesFolder),
-            type: "zip",
-          });
+      );
+    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
+    awsApiGatewayIntegrationTsLambda.overrideLogicalId("ts_lambda");
+    const awsApiGatewayIntegrationTsLambdaRoot =
+      new aws.apiGatewayIntegration.ApiGatewayIntegration(
+        this,
+        "ts_lambda_root_54",
+        {
+          httpMethod: this.awsApiGatewayMethodTsLambdaRoot.httpMethod,
+          integrationHttpMethod: "POST",
+          resourceId: this.awsApiGatewayRestApiTsLambda.rootResourceId,
+          restApiId: this.awsApiGatewayRestApiTsLambda.id,
+          type: "AWS_PROXY",
+          uri: awsLambdaFunctionTsLambda.invokeArn,
+        }
+      );
+    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
+    awsApiGatewayIntegrationTsLambdaRoot.overrideLogicalId("ts_lambda_root");
+    const awsCloudwatchLogGroupTsLambdaLoggroup =
+      new aws.cloudwatchLogGroup.CloudwatchLogGroup(
+        this,
+        "ts_lambda_loggroup",
+        {
+          name:awsLambdaFunctionTsLambda.functionName, //`/aws/lambda/${awsLambdaFunctionTsLambda.functionName}`,
+          retentionInDays: 3,
+        }
+      );
+    const dataAwsIamPolicyDocumentTsLambdaPolicy =
+      new aws.dataAwsIamPolicyDocument.DataAwsIamPolicyDocument(
+        this,
+        "ts_lambda_policy",
+        {
+          statement: [
+            {
+              actions: ["logs:CreateLogStream", "logs:PutLogEvents"],
+              resources: [
+                awsCloudwatchLogGroupTsLambdaLoggroup.arn,
+                `${awsCloudwatchLogGroupTsLambdaLoggroup.arn}:*`,
+              ],
+            },
+          ],
+        }
+      );
+    const awsApiGatewayDeploymentTsLambda =
+      new aws.apiGatewayDeployment.ApiGatewayDeployment(this, "ts_lambda_57", {
+        dependsOn:
+        //HERE
+        [
+          this.cors,
+          awsApiGatewayIntegrationTsLambda,
+        ],
+        restApiId: this.awsApiGatewayRestApiTsLambda.id,
+        stageName: this.name,
+      });
+    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
+    awsApiGatewayDeploymentTsLambda.overrideLogicalId("ts_lambda");
+    new aws.iamRolePolicy.IamRolePolicy(this, "ts_lambda_role_policy", {
+      name: "my-lambda-policy",
+      policy: dataAwsIamPolicyDocumentTsLambdaPolicy.json,
+      role: this.awsIamRoleTsLambdaRole.id,
+    });
+    new cdktf.TerraformOutput(this, "url", {
+      value: awsApiGatewayDeploymentTsLambda.invokeUrl,
+    });
   }
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
-
+    console.log({currentDir:this.currentDir, awsFolder:this.awsFolder,lambdaFolder:this.lambdaFolder,packagesFolder:this.packagesFolder,layersFolder:this.layersFolder,terraformFolder:this.terraformFolder})
     new cdktf.S3Backend(this, {
       bucket: "jslt-aws-s3-bucket-terraform-state",
       key: "my_lambda/terraform.tfstate",
@@ -126,14 +246,9 @@ You can read more about this at https://cdk.tf/variables*/
       profile: "jon2g-jslt",
       region: "us-east-1",
     });
-    const awsFolder = "./../../../../";
-    const lambdaFolder = awsFolder + "lambda/";
-    const lambdaFunctionsFolder = awsFolder + "lambda/functions";
-    const layersFolder = lambdaFolder + "layers/";
-    const packagesFolder = awsFolder + "packages/";
-    const terraformFolder = awsFolder + "terraform/";
-    console.log({awsFolder,lambdaFolder,packagesFolder,layersFolder,terraformFolder})
-    const baseLayerZip = layersFolder+"baseLayer.zip"
+
+
+
     const docdbInstanceClass = new cdktf.TerraformVariable(
       this,
       "docdb_instance_class",
@@ -156,8 +271,7 @@ You can read more about this at https://cdk.tf/variables*/
           "Whether to retain the old version of a previously deployed Lambda Layer.",
       }
     );
-    const name = "jslt"
-    const region = "us-east-1"
+
     const s3Bucket = new cdktf.TerraformVariable(this, "s3_bucket", {
       default: "jslt-aws-s3-bucket-terraform-state",
     });
@@ -165,15 +279,7 @@ You can read more about this at https://cdk.tf/variables*/
     // const lamdaFunctionsDir = new cdktf.TerraformVariable(this, "lamda_functions_dir", {
     //   default: "./../lambda/functions",
     // });
-    const awsAz = "us-east-1a";
-    const awsBz = "us-east-1b";
-    const linuxAssociatePublicIpAddress = true;
-    const linuxDataVolumeSize = 10;
-    const linuxDataVolumeType = "gp2";
-    const linuxInstanceType = "t2.micro";
-    const linuxRootVolumeSize = 20;
-    const linuxRootVolumeType = "gp2";
-    const publicSubnetCidr = "10.0.104.0/24";
+
     // new cdktf.TerraformOutput(this, "bucket_key", {
     //   value: `zips/lambda_function_\${${lambdasVersion.value}}.zip`,
     // });
@@ -188,9 +294,9 @@ You can read more about this at https://cdk.tf/variables*/
     //cdktfTerraformOutputName.overrideLogicalId("name");
     const vpc = new Vpc.Vpc(this, "vpc", {
       azs: [
-        `${region}a`,
-        `${region}b`,
-        `${region}c`,
+        `${this.region}a`,
+        `${this.region}b`,
+        `${this.region}c`,
       ],
       cidr: "10.0.0.0/16",
       enableDnsHostnames: true,
@@ -200,14 +306,14 @@ You can read more about this at https://cdk.tf/variables*/
       manageDefaultNetworkAcl: true,
       manageDefaultRouteTable: true,
       manageDefaultSecurityGroup: true,
-      name: `tf-${name}`,
+      name: `tf-${this.name}`,
       privateSubnets: ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
       publicSubnets: ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"],
       singleNatGateway: false,
     });
-    const awsApiGatewayRestApiTsLambda =
+    this.awsApiGatewayRestApiTsLambda =
       new aws.apiGatewayRestApi.ApiGatewayRestApi(this, "ts_lambda", {
-        name: `tf-${name}`,
+        name: `tf-${this.name}`,
       });
     const awsDocdbClusterParameterGroupTsLambda =
       new aws.docdbClusterParameterGroup.DocdbClusterParameterGroup(
@@ -215,7 +321,7 @@ You can read more about this at https://cdk.tf/variables*/
         "ts_lambda_15",
         {
           family: "docdb5.0",
-          name: `tf-${name}`,
+          name: `tf-${this.name}`,
           parameter: [
             {
               name: "tls",
@@ -224,13 +330,13 @@ You can read more about this at https://cdk.tf/variables*/
           ],
         }
       );
-      const awsSubnetPublicSubnet = new aws.subnet.Subnet(this, "public-subnet", {
-        availabilityZone: awsAz,
-        cidrBlock: publicSubnetCidr,
+      this.awsSubnetPublicSubnet = new aws.subnet.Subnet(this, "public-subnet", {
+        availabilityZone: this.awsAz,
+        cidrBlock: this.publicSubnetCidr,
         vpcId: vpc.vpcIdOutput
       });
-      const awsSubnetPublicSubnet2 = new aws.subnet.Subnet(this, "public-subnet2", {
-        availabilityZone: awsBz,
+      this.awsSubnetPublicSubnet2 = new aws.subnet.Subnet(this, "public-subnet2", {
+        availabilityZone: this.awsBz,
         cidrBlock: "10.0.105.0/24",
         vpcId: vpc.vpcIdOutput
       });
@@ -238,12 +344,12 @@ You can read more about this at https://cdk.tf/variables*/
     awsDocdbClusterParameterGroupTsLambda.overrideLogicalId("ts_lambda");
     const awsDocdbSubnetGroupTsLambda =
       new aws.docdbSubnetGroup.DocdbSubnetGroup(this, "ts_lambda_16", {
-        name: `tf-${name}`,
-        subnetIds:[awsSubnetPublicSubnet.id,awsSubnetPublicSubnet2.id] //vpc.privateSubnets! //[awsSubnetPublicSubnet.id] //vpc.privateSubnets??[] //[privateSubnetsOutput],
+        name: `tf-${this.name}`,
+        subnetIds:[this.awsSubnetPublicSubnet.id,this.awsSubnetPublicSubnet2.id] //vpc.privateSubnets! //[awsSubnetPublicSubnet.id] //vpc.privateSubnets??[] //[privateSubnetsOutput],
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsDocdbSubnetGroupTsLambda.overrideLogicalId("ts_lambda");
-    const awsIamRoleTsLambdaRole = new aws.iamRole.IamRole(
+    this.awsIamRoleTsLambdaRole = new aws.iamRole.IamRole(
       this,
       "ts_lambda_role",
       {
@@ -258,7 +364,7 @@ You can read more about this at https://cdk.tf/variables*/
       {
         policyArn:
           "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
-        role: awsIamRoleTsLambdaRole.name,
+        role: this.awsIamRoleTsLambdaRole.name,
       }
     );
     const awsRouteTablePublicRt = new aws.routeTable.RouteTable(
@@ -292,9 +398,9 @@ You can read more about this at https://cdk.tf/variables*/
       "layer_package",
       {
         bucket: s3Bucket.value,
-        key: Fn.basename(Fn.abspath(baseLayerZip)),
-        source:Fn.abspath(baseLayerZip), 
-        sourceHash:Fn.filemd5(Fn.abspath(baseLayerZip)),
+        key: Fn.basename(Fn.abspath(this.baseLayerZip)),
+        source:Fn.abspath(this.baseLayerZip), 
+        sourceHash:Fn.filemd5(Fn.abspath(this.baseLayerZip)),
       }
     );
     /*In most cases loops should be handled in the programming language context and 
@@ -367,11 +473,11 @@ you need to keep this like it is.*/
             toPort: 22,
           },
         ],
-        name: `tf-${name}-ssh`,
+        name: `tf-${this.name}-ssh`,
         vpcId: vpc.vpcIdOutput,
       }
     );
-    const awsSecurityGroupTsLambda = new aws.securityGroup.SecurityGroup(
+    this.awsSecurityGroupTsLambda = new aws.securityGroup.SecurityGroup(
       this,
       "ts_lambda_24",
       {
@@ -391,12 +497,12 @@ you need to keep this like it is.*/
             toPort: 0,
           },
         ],
-        name: `tf-${name}`,
+        name: `tf-${this.name}`,
         vpcId: vpc.vpcIdOutput,
       }
     );
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsSecurityGroupTsLambda.overrideLogicalId("ts_lambda");
+    this.awsSecurityGroupTsLambda.overrideLogicalId("ts_lambda");
     const tlsPrivateKeyTsLambda = new tls.privateKey.PrivateKey(
       this,
       "ts_lambda_27",
@@ -407,7 +513,7 @@ you need to keep this like it is.*/
     );
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     tlsPrivateKeyTsLambda.overrideLogicalId("ts_lambda");
-    this.getLambdaFolders(lambdaFunctionsFolder)
+
     /*In most cases loops should be handled in the programming language context and 
 not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
 you should consider using a for loop. If you are looping over something only known to Terraform, e.g. a result of a data source
@@ -453,46 +559,46 @@ you need to keep this like it is.*/
         owners: ["099720109477"],
       }
     );
-    const dataAwsCallerIdentityCurrent =
+    this.dataAwsCallerIdentityCurrent =
       new aws.dataAwsCallerIdentity.DataAwsCallerIdentity(this, "current", {});
     new cdktf.TerraformOutput(this, "bucket", {
       value: awsS3BucketTerraformState.bucket,
     });
-    const awsApiGatewayMethodTsLambdaRoot =
+    this.awsApiGatewayMethodTsLambdaRoot =
       new aws.apiGatewayMethod.ApiGatewayMethod(this, "ts_lambda_root", {
         authorization: "NONE",
         httpMethod: "ANY",
-        resourceId: awsApiGatewayRestApiTsLambda.rootResourceId,
-        restApiId: awsApiGatewayRestApiTsLambda.id,
+        resourceId: this.awsApiGatewayRestApiTsLambda.rootResourceId,
+        restApiId: this.awsApiGatewayRestApiTsLambda.id,
       });
     const awsApiGatewayResourceTsLambda =
       new aws.apiGatewayResource.ApiGatewayResource(this, "ts_lambda_34", {
-        parentId: awsApiGatewayRestApiTsLambda.rootResourceId,
+        parentId: this.awsApiGatewayRestApiTsLambda.rootResourceId,
         pathPart: "{proxy+}",
-        restApiId: awsApiGatewayRestApiTsLambda.id,
+        restApiId: this.awsApiGatewayRestApiTsLambda.id,
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsApiGatewayResourceTsLambda.overrideLogicalId("ts_lambda");
-    const awsDocdbClusterTsLambda = new aws.docdbCluster.DocdbCluster(
+    this.awsDocdbClusterTsLambda = new aws.docdbCluster.DocdbCluster(
       this,
       "ts_lambda_35",
       {
-        clusterIdentifier: `tf-${name}`,
+        clusterIdentifier: `tf-${this.name}`,
         dbClusterParameterGroupName: awsDocdbClusterParameterGroupTsLambda.name,
         dbSubnetGroupName: awsDocdbSubnetGroupTsLambda.name,
         engine: "docdb",
         masterPassword: docdbPassword.value,
-        masterUsername: `tf_${Fn.replace(name,'-','_')}_admin`,
+        masterUsername: `tf_${Fn.replace(this.name,'-','_')}_admin`,
         skipFinalSnapshot: true,
-        vpcSecurityGroupIds: [awsSecurityGroupTsLambda.id],
+        vpcSecurityGroupIds: [this.awsSecurityGroupTsLambda.id],
       }
     );
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsDocdbClusterTsLambda.overrideLogicalId("ts_lambda");
+    this.awsDocdbClusterTsLambda.overrideLogicalId("ts_lambda");
     const awsDocdbClusterInstanceTsLambda =
       new aws.docdbClusterInstance.DocdbClusterInstance(this, "ts_lambda_36", {
-        clusterIdentifier: awsDocdbClusterTsLambda.id,
-        identifier: `tf-${name}-1`,
+        clusterIdentifier: this.awsDocdbClusterTsLambda.id,
+        identifier: `tf-${this.name}-1`,
         instanceClass: docdbInstanceClass.value,
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
@@ -503,23 +609,12 @@ you should consider using a for loop. If you are looping over something only kno
 you need to keep this like it is.*/
    //awsDocdbClusterInstanceTsLambda.addOverride("count", 1);
     const awsKeyPairTsLambda = new aws.keyPair.KeyPair(this, "ts_lambda_37", {
-      keyName: `tf-${name}-ec2`,
+      keyName: `tf-${this.name}-ec2`,
       publicKey: tlsPrivateKeyTsLambda.publicKeyOpenssh,
     });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsKeyPairTsLambda.overrideLogicalId("ts_lambda");
-    const awsLambdaLayerVersionThis =
-      new aws.lambdaLayerVersion.LambdaLayerVersion(this, "this_38", {
-        compatibleRuntimes: ["nodejs18.x"],
-        layerName: `${name}-baseLayer`,
-        s3Bucket: s3Bucket.value,
-        s3Key: awsS3ObjectLayerPackage.key,
-        s3ObjectVersion:awsS3ObjectLayerPackage.versionId,
-        skipDestroy: layerSkipDestroy.value,
-        sourceCodeHash:Fn.filebase64sha256(baseLayerZip),
-      });
-    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsLambdaLayerVersionThis.overrideLogicalId("this");
+
     /*In most cases loops should be handled in the programming language context and 
 not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
 you should consider using a for loop. If you are looping over something only known to Terraform, e.g. a result of a data source
@@ -530,7 +625,7 @@ you need to keep this like it is.*/
       "public-rt-association",
       {
         routeTableId: awsRouteTablePublicRt.id,
-        subnetId: awsSubnetPublicSubnet.id,
+        subnetId: this.awsSubnetPublicSubnet.id,
       }
     );
     new local.file.File(this, "ts_lambda_private_key", {
@@ -539,32 +634,32 @@ you need to keep this like it is.*/
       filename: "docdb-bastion.pem",
     });
     new cdktf.TerraformOutput(this, "docdb_endpoint", {
-      value: awsDocdbClusterTsLambda.endpoint,
+      value: this.awsDocdbClusterTsLambda.endpoint,
     });
     new cdktf.TerraformOutput(this, "docdb_port", {
-      value: awsDocdbClusterTsLambda.port,
+      value: this.awsDocdbClusterTsLambda.port,
     });
     new cdktf.TerraformOutput(this, "docdb_username", {
-      value: awsDocdbClusterTsLambda.masterUsername,
+      value: this.awsDocdbClusterTsLambda.masterUsername,
     });
-    const cors =
+    this.cors =
       new TerraformApiGatewayCorsModule.TerraformApiGatewayCorsModule(
         this,
         "cors",
         {
           resourceId: awsApiGatewayResourceTsLambda.id,
-          restApiId: awsApiGatewayRestApiTsLambda.id,
+          restApiId: this.awsApiGatewayRestApiTsLambda.id,
         }
       );
-    const awsApiGatewayMethodTsLambda =
+    this.awsApiGatewayMethodTsLambda =
       new aws.apiGatewayMethod.ApiGatewayMethod(this, "ts_lambda_45", {
         authorization: "NONE",
         httpMethod: "ANY",
         resourceId: awsApiGatewayResourceTsLambda.id,
-        restApiId: awsApiGatewayRestApiTsLambda.id,
+        restApiId: this.awsApiGatewayRestApiTsLambda.id,
       });
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsApiGatewayMethodTsLambda.overrideLogicalId("ts_lambda");
+    this.awsApiGatewayMethodTsLambda.overrideLogicalId("ts_lambda");
     const awsInstanceDocdbBastion = new aws.instance.Instance(
       this,
       "docdb_bastion",
@@ -583,128 +678,68 @@ you need to keep this like it is.*/
         instanceType: "t2.micro",
         keyName: awsKeyPairTsLambda.keyName,
         //subnetId: `\${${vpc.publicSubnetsOutput.fqn}[0]}`,
-        subnetId: awsSubnetPublicSubnet.id,//vpc.publicSubnets![0], //.publicSubnetsOutput,
+        subnetId: this.awsSubnetPublicSubnet.id,//vpc.publicSubnets![0], //.publicSubnetsOutput,
         tags: {
           Name: "docdb-bastion-vm",
         },
         vpcSecurityGroupIds: [
-          awsSecurityGroupTsLambda.id,
+          this.awsSecurityGroupTsLambda.id,
           awsSecurityGroupIngressSsh.id,
         ],
       }
     );
 
-    const awsInstanceVictimEc2 = new aws.instance.Instance(this, "victim_ec2", {
+    this.awsInstanceVictimEc2 = new aws.instance.Instance(this, "victim_ec2", {
       ami: dataAwsAmiUbuntuLinux2004.id,
-      associatePublicIpAddress: linuxAssociatePublicIpAddress,
+      associatePublicIpAddress: this.linuxAssociatePublicIpAddress,
       ebsBlockDevice: [
         {
           deleteOnTermination: true,
           deviceName: "/dev/xvda",
           encrypted: true,
-          volumeSize: linuxDataVolumeSize,
-          volumeType: linuxDataVolumeType,
+          volumeSize: this.linuxDataVolumeSize,
+          volumeType: this.linuxDataVolumeType,
         },
       ],
-      instanceType: linuxInstanceType,
+      instanceType: this.linuxInstanceType,
       keyName: awsKeyPairTsLambda.keyName,
       rootBlockDevice: {
         deleteOnTermination: true,
         encrypted: true,
-        volumeSize: linuxRootVolumeSize,
-        volumeType: linuxRootVolumeType,
+        volumeSize: this.linuxRootVolumeSize,
+        volumeType: this.linuxRootVolumeType,
       },
       sourceDestCheck: false,
-      subnetId: awsSubnetPublicSubnet.id,
+      subnetId: this.awsSubnetPublicSubnet.id,
       tags: {
         Name: "linux-vm",
       },
-      userData:Fn.file(Fn.abspath(terraformFolder+"ec2_victim/aws-user-data.sh")),
+      userData:Fn.file(Fn.abspath(this.terraformFolder+"ec2_victim/aws-user-data.sh")),
       vpcSecurityGroupIds: [awsSecurityGroupAwsLinuxSg.id],
     });
+
+    this.awsLambdaLayerVersionThis =
+    new aws.lambdaLayerVersion.LambdaLayerVersion(this, "this_38", {
+      compatibleRuntimes: ["nodejs18.x"],
+      layerName: `${this.name}-baseLayer`,
+      s3Bucket: s3Bucket.value,
+      s3Key: awsS3ObjectLayerPackage.key,
+      s3ObjectVersion:awsS3ObjectLayerPackage.versionId,
+      skipDestroy: layerSkipDestroy.value,
+      sourceCodeHash:Fn.filebase64sha256(this.baseLayerZip),
+    });
+  /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
+  this.awsLambdaLayerVersionThis.overrideLogicalId("this");
+
+    this.addLambdaFunctions()
 
     new cdktf.TerraformOutput(this, "aws_insta nce_public_dns", {
       value: awsInstanceDocdbBastion.publicDns,
     });
     new cdktf.TerraformOutput(this, "victim_ec2_aws_eip", {
-      value: awsInstanceVictimEc2.publicIp,
+      value: this.awsInstanceVictimEc2.publicIp,
     });
-    const awsApiGatewayIntegrationTsLambda =
-      new aws.apiGatewayIntegration.ApiGatewayIntegration(
-        this,
-        "ts_lambda_53",
-        {
-          httpMethod: awsApiGatewayMethodTsLambda.httpMethod,
-          integrationHttpMethod: "POST",
-          resourceId: awsApiGatewayMethodTsLambda.resourceId,
-          restApiId: awsApiGatewayRestApiTsLambda.id,
-          type: "AWS_PROXY",
-          uri: awsLambdaFunctionTsLambda.invokeArn,
-        }
-      );
-    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsApiGatewayIntegrationTsLambda.overrideLogicalId("ts_lambda");
-    const awsApiGatewayIntegrationTsLambdaRoot =
-      new aws.apiGatewayIntegration.ApiGatewayIntegration(
-        this,
-        "ts_lambda_root_54",
-        {
-          httpMethod: awsApiGatewayMethodTsLambdaRoot.httpMethod,
-          integrationHttpMethod: "POST",
-          resourceId: awsApiGatewayRestApiTsLambda.rootResourceId,
-          restApiId: awsApiGatewayRestApiTsLambda.id,
-          type: "AWS_PROXY",
-          uri: awsLambdaFunctionTsLambda.invokeArn,
-        }
-      );
-    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsApiGatewayIntegrationTsLambdaRoot.overrideLogicalId("ts_lambda_root");
-    const awsCloudwatchLogGroupTsLambdaLoggroup =
-      new aws.cloudwatchLogGroup.CloudwatchLogGroup(
-        this,
-        "ts_lambda_loggroup",
-        {
-          name:awsLambdaFunctionTsLambda.functionName, //`/aws/lambda/${awsLambdaFunctionTsLambda.functionName}`,
-          retentionInDays: 3,
-        }
-      );
-    const dataAwsIamPolicyDocumentTsLambdaPolicy =
-      new aws.dataAwsIamPolicyDocument.DataAwsIamPolicyDocument(
-        this,
-        "ts_lambda_policy",
-        {
-          statement: [
-            {
-              actions: ["logs:CreateLogStream", "logs:PutLogEvents"],
-              resources: [
-                awsCloudwatchLogGroupTsLambdaLoggroup.arn,
-                `${awsCloudwatchLogGroupTsLambdaLoggroup.arn}:*`,
-              ],
-            },
-          ],
-        }
-      );
-    const awsApiGatewayDeploymentTsLambda =
-      new aws.apiGatewayDeployment.ApiGatewayDeployment(this, "ts_lambda_57", {
-        dependsOn:
-        //HERE
-        [
-          cors,
-          awsApiGatewayIntegrationTsLambda,
-        ],
-        restApiId: awsApiGatewayRestApiTsLambda.id,
-        stageName: name,
-      });
-    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsApiGatewayDeploymentTsLambda.overrideLogicalId("ts_lambda");
-    new aws.iamRolePolicy.IamRolePolicy(this, "ts_lambda_role_policy", {
-      name: "my-lambda-policy",
-      policy: dataAwsIamPolicyDocumentTsLambdaPolicy.json,
-      role: awsIamRoleTsLambdaRole.id,
-    });
-    new cdktf.TerraformOutput(this, "url", {
-      value: awsApiGatewayDeploymentTsLambda.invokeUrl,
-    });
+    
   }
 }
 
