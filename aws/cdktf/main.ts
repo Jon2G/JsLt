@@ -21,6 +21,92 @@ import { LocalProvider } from "./.gen/providers/local/provider";
 import { TlsProvider } from "./.gen/providers/tls/provider";
 
 class MyStack extends TerraformStack {
+
+  private getLambdaFolders(path:string){
+    const functions = []
+    const folders = fs.readdirSync(path)
+    .map(file=>{
+      return {
+        fullPath:path.join(path,file),
+        folderName:file
+      }
+    })
+    .filter((x) => fs.lstatSync(x.fullPath).isDirectory())
+    for(const lambdaFolder of folders){
+      this.addLambdaFunction(lambdaFolder.fullPath,lambdaFolder.folderName)
+    }
+  }
+
+  private addLambdaFunction(path:string,name:string){
+
+
+    const awsLambdaFunctionTsLambda = new aws.lambdaFunction.LambdaFunction(
+      this,
+      "ts_lambda_48",
+      {
+        dependsOn: [awsInstanceVictimEc2], //HERE
+        environment: {
+          variables: {
+            dbConnectionString: `mongodb://${awsDocdbClusterTsLambda.masterUsername}:${awsDocdbClusterTsLambda.masterPassword}@${awsDocdbClusterTsLambda.endpoint}:${awsDocdbClusterTsLambda.port}/jslt?tls=false&tlsCAFile=/opt/nodejs/docdb-bastion.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`,
+            testingIp: awsInstanceVictimEc2.privateIp,
+          },
+        },
+        filename: dataArchiveFileLambdaPackage.outputPath,
+        functionName: "ts_lambda",
+        handler: "index.handler",
+        layers:[ awsLambdaLayerVersionThis.arn],
+        memorySize: 1024,
+        role: awsIamRoleTsLambdaRole.arn,
+        runtime: "nodejs18.x",
+        timeout: 300,
+        vpcConfig: {
+          securityGroupIds: [awsSecurityGroupTsLambda.id],
+          subnetIds:[awsSubnetPublicSubnet.id,awsSubnetPublicSubnet2.id], //vpc.publicSubnets??[] //[vpc.publicSubnetsOutput],
+        },
+      }
+    );
+    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
+    awsLambdaFunctionTsLambda.overrideLogicalId("ts_lambda");
+    new aws.lambdaFunctionUrl.LambdaFunctionUrl(this, "ts_lambda_funtion_url", {
+      authorizationType: "NONE",
+      cors: {
+        allowOrigins: ["*"],
+      },
+      functionName: awsLambdaFunctionTsLambda.id,
+    });
+    new aws.lambdaPermission.LambdaPermission(this, "apigw", {
+      action: "lambda:InvokeFunction",
+      functionName: awsLambdaFunctionTsLambda.arn,
+      principal: "apigateway.amazonaws.com",
+      sourceArn: "arn:aws:execute-api:"+region+":"+dataAwsCallerIdentityCurrent.accountId+":"+awsApiGatewayRestApiTsLambda.id+"/*/*",
+      statementId: "AllowAPIGatewayInvoke",
+    });
+    
+        const filesKeepers = fs.readdirSync('./../packages/').map((filename) => {
+          return {
+            name: filename,
+            md5: crypto
+              .createHash("md5")
+              .update(fs.readFileSync(`${'./../packages/'}${filename}`))
+              .digest("hex"),
+          };
+        });
+        const keepers: { [key: string]: string } = {};
+        for (const file of filesKeepers) {
+          keepers[file.name] = file.md5;
+        }
+        const randomUuidThis = new random.uuid.Uuid(this, "this", {
+          keepers: keepers,
+        });
+        const dataArchiveFileLambdaPackage =
+          new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package", {
+            outputFileMode: "0666",
+            outputPath: terraformFolder +`/zips/lambda_function_${randomUuidThis}.zip`,
+            sourceDir:Fn.abspath(packagesFolder),
+            type: "zip",
+          });
+  }
+
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
@@ -42,6 +128,7 @@ You can read more about this at https://cdk.tf/variables*/
     });
     const awsFolder = "./../../../../";
     const lambdaFolder = awsFolder + "lambda/";
+    const lambdaFunctionsFolder = awsFolder + "lambda/functions";
     const layersFolder = lambdaFolder + "layers/";
     const packagesFolder = awsFolder + "packages/";
     const terraformFolder = awsFolder + "terraform/";
@@ -310,28 +397,6 @@ you need to keep this like it is.*/
     );
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     awsSecurityGroupTsLambda.overrideLogicalId("ts_lambda");
-
-    const filesKeepers = fs.readdirSync('./../packages/').map((filename) => {
-      return {
-        name: filename,
-        md5: crypto
-          .createHash("md5")
-          .update(fs.readFileSync(`${'./../packages/'}${filename}`))
-          .digest("hex"),
-      };
-    });
-    const keepers: { [key: string]: string } = {};
-    for (const file of filesKeepers) {
-      keepers[file.name] = file.md5;
-    }
-    const randomUuidThis = new random.uuid.Uuid(this, "this", {
-      keepers: keepers,
-    });
-    /*In most cases loops should be handled in the programming language context and 
-not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
-you should consider using a for loop. If you are looping over something only known to Terraform, e.g. a result of a data source
-you need to keep this like it is.*/
-    //randomUuidThis.addOverride("count", 1);
     const tlsPrivateKeyTsLambda = new tls.privateKey.PrivateKey(
       this,
       "ts_lambda_27",
@@ -342,13 +407,7 @@ you need to keep this like it is.*/
     );
     /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
     tlsPrivateKeyTsLambda.overrideLogicalId("ts_lambda");
-    const dataArchiveFileLambdaPackage =
-      new archive.dataArchiveFile.DataArchiveFile(this, "lambda_package", {
-        outputFileMode: "0666",
-        outputPath: terraformFolder +`/zips/lambda_function_${randomUuidThis}.zip`,
-        sourceDir:Fn.abspath(packagesFolder),
-        type: "zip",
-      });
+    this.getLambdaFolders(lambdaFunctionsFolder)
     /*In most cases loops should be handled in the programming language context and 
 not inside of the Terraform context. If you are looping over something external, e.g. a variable or a file input
 you should consider using a for loop. If you are looping over something only known to Terraform, e.g. a result of a data source
@@ -563,47 +622,7 @@ you need to keep this like it is.*/
       userData:Fn.file(Fn.abspath(terraformFolder+"ec2_victim/aws-user-data.sh")),
       vpcSecurityGroupIds: [awsSecurityGroupAwsLinuxSg.id],
     });
-    const awsLambdaFunctionTsLambda = new aws.lambdaFunction.LambdaFunction(
-      this,
-      "ts_lambda_48",
-      {
-        dependsOn: [awsInstanceVictimEc2], //HERE
-        environment: {
-          variables: {
-            dbConnectionString: `mongodb://${awsDocdbClusterTsLambda.masterUsername}:${awsDocdbClusterTsLambda.masterPassword}@${awsDocdbClusterTsLambda.endpoint}:${awsDocdbClusterTsLambda.port}/jslt?tls=false&tlsCAFile=/opt/nodejs/docdb-bastion.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`,
-            testingIp: awsInstanceVictimEc2.privateIp,
-          },
-        },
-        filename: dataArchiveFileLambdaPackage.outputPath,
-        functionName: "ts_lambda",
-        handler: "index.handler",
-        layers:[ awsLambdaLayerVersionThis.arn],
-        memorySize: 1024,
-        role: awsIamRoleTsLambdaRole.arn,
-        runtime: "nodejs18.x",
-        timeout: 300,
-        vpcConfig: {
-          securityGroupIds: [awsSecurityGroupTsLambda.id],
-          subnetIds:[awsSubnetPublicSubnet.id,awsSubnetPublicSubnet2.id], //vpc.publicSubnets??[] //[vpc.publicSubnetsOutput],
-        },
-      }
-    );
-    /*This allows the Terraform resource name to match the original name. You can remove the call if you don't need them to match.*/
-    awsLambdaFunctionTsLambda.overrideLogicalId("ts_lambda");
-    new aws.lambdaFunctionUrl.LambdaFunctionUrl(this, "ts_lambda_funtion_url", {
-      authorizationType: "NONE",
-      cors: {
-        allowOrigins: ["*"],
-      },
-      functionName: awsLambdaFunctionTsLambda.id,
-    });
-    new aws.lambdaPermission.LambdaPermission(this, "apigw", {
-      action: "lambda:InvokeFunction",
-      functionName: awsLambdaFunctionTsLambda.arn,
-      principal: "apigateway.amazonaws.com",
-      sourceArn: "arn:aws:execute-api:"+region+":"+dataAwsCallerIdentityCurrent.accountId+":"+awsApiGatewayRestApiTsLambda.id+"/*/*",
-      statementId: "AllowAPIGatewayInvoke",
-    });
+
     new cdktf.TerraformOutput(this, "aws_insta nce_public_dns", {
       value: awsInstanceDocdbBastion.publicDns,
     });
