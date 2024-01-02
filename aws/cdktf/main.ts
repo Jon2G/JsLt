@@ -41,7 +41,7 @@ class MyStack extends TerraformStack {
   private cors: TerraformApiGatewayCorsModule.TerraformApiGatewayCorsModule
 
   private currentDir = path.resolve("./");
-  private awsFolder:string = path.resolve("./../../../../");
+  private awsFolder:string = path.resolve(path.join(this.currentDir,"./../"));
   private lambdaFolder:string =path.join( this.awsFolder , "lambda/")
   private lambdaFunctionsFolder:string = path.join(this.awsFolder , "lambda/functions")
   private layersFolder:string =path.join( this.lambdaFolder , "layers/")
